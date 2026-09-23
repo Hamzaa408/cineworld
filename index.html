@@ -4,21 +4,132 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CineWorld</title>
+
 <style>
-body{margin:0;background:#0b0b0b;color:white;font-family:Arial,sans-serif}
-header{padding:20px;background:#151515;text-align:center}
-.logo{font-size:30px;font-weight:bold;color:#e50914}
-.search{margin:20px auto;display:block;width:85%;max-width:500px;padding:14px;border:0;border-radius:8px;background:#222;color:white}
-h1{text-align:center}
-.movies{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;padding:20px}
-.card{background:#171717;border-radius:10px;overflow:hidden}
-.poster{height:220px;background:#292929;display:flex;align-items:center;justify-content:center;color:#777}
-.info{padding:12px}
-.info h2{font-size:18px;margin:0 0 8px}
-.info p{color:#aaa;margin:0}
-@media(min-width:700px){.movies{grid-template-columns:repeat(4,1fr)}}
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:#0b0b0b;
+color:white;
+font-family:Arial,sans-serif;
+}
+
+header{
+padding:25px 15px;
+background:#151515;
+text-align:center;
+}
+
+.logo{
+font-size:34px;
+font-weight:bold;
+color:#e50914;
+}
+
+header p{
+color:#aaa;
+margin:8px 0 0;
+}
+
+.search{
+display:block;
+width:90%;
+max-width:600px;
+margin:25px auto;
+padding:15px;
+border:1px solid #333;
+border-radius:10px;
+background:#1b1b1b;
+color:white;
+font-size:16px;
+outline:none;
+}
+
+h1{
+text-align:center;
+margin:30px 0 20px;
+}
+
+.movies{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+padding:15px;
+max-width:1200px;
+margin:auto;
+}
+
+.card{
+background:#171717;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 4px 15px #000;
+}
+
+.poster{
+height:250px;
+background:#292929;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+}
+
+.poster img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.info{
+padding:14px;
+}
+
+.info h2{
+font-size:18px;
+margin:0 0 8px;
+}
+
+.info p{
+color:#aaa;
+margin:5px 0 12px;
+}
+
+.buttons{
+display:flex;
+gap:8px;
+}
+
+.btn{
+flex:1;
+padding:10px;
+border:0;
+border-radius:7px;
+font-weight:bold;
+text-align:center;
+text-decoration:none;
+cursor:pointer;
+}
+
+.watch{
+background:#e50914;
+color:white;
+}
+
+.trailer{
+background:#333;
+color:white;
+}
+
+@media(min-width:700px){
+.movies{
+grid-template-columns:repeat(4,1fr);
+}
+}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -26,45 +137,96 @@ h1{text-align:center}
 <p>Movies • Reviews • Trailers</p>
 </header>
 
-<input class="search" type="text" placeholder="Search movies...">
+<input
+class="search"
+id="search"
+type="text"
+placeholder="Search movies..."
+onkeyup="searchMovies()"
+>
 
 <h1>Latest Movies</h1>
 
-<div class="movies">
+<div class="movies" id="movieList">
 
 <div class="card">
-<div class="poster">MOVIE POSTER</div>
+<div class="poster">
+<img src="https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg" alt="Movie poster">
+</div>
 <div class="info">
-<h2>Movie Title</h2>
+<h2>Example Movie</h2>
 <p>2026 • Action</p>
+<div class="buttons">
+<a class="btn watch" href="#" onclick="comingSoon()">Watch</a>
+<a class="btn trailer" href="#" onclick="comingSoon()">Trailer</a>
+</div>
 </div>
 </div>
 
 <div class="card">
-<div class="poster">MOVIE POSTER</div>
+<div class="poster">
+<img src="https://image.tmdb.org/t/p/w500/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg" alt="Movie poster">
+</div>
 <div class="info">
-<h2>Movie Title</h2>
+<h2>Example Drama</h2>
 <p>2026 • Drama</p>
+<div class="buttons">
+<a class="btn watch" href="#" onclick="comingSoon()">Watch</a>
+<a class="btn trailer" href="#" onclick="comingSoon()">Trailer</a>
+</div>
 </div>
 </div>
 
 <div class="card">
-<div class="poster">MOVIE POSTER</div>
+<div class="poster">
+<img src="https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg" alt="Movie poster">
+</div>
 <div class="info">
-<h2>Movie Title</h2>
+<h2>Example Comedy</h2>
 <p>2026 • Comedy</p>
+<div class="buttons">
+<a class="btn watch" href="#" onclick="comingSoon()">Watch</a>
+<a class="btn trailer" href="#" onclick="comingSoon()">Trailer</a>
+</div>
 </div>
 </div>
 
 <div class="card">
-<div class="poster">MOVIE POSTER</div>
+<div class="poster">
+<img src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Movie poster">
+</div>
 <div class="info">
-<h2>Movie Title</h2>
+<h2>Example Adventure</h2>
 <p>2026 • Adventure</p>
+<div class="buttons">
+<a class="btn watch" href="#" onclick="comingSoon()">Watch</a>
+<a class="btn trailer" href="#" onclick="comingSoon()">Trailer</a>
+</div>
 </div>
 </div>
 
 </div>
+
+<script>
+function searchMovies(){
+let input=document.getElementById("search").value.toLowerCase();
+let cards=document.querySelectorAll(".card");
+
+cards.forEach(card=>{
+let title=card.querySelector("h2").innerText.toLowerCase();
+
+if(title.includes(input)){
+card.style.display="";
+}else{
+card.style.display="none";
+}
+});
+}
+
+function comingSoon(){
+alert("Movie link will be added soon.");
+}
+</script>
 
 </body>
 </html>
