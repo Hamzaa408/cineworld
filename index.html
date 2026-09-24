@@ -307,5 +307,36 @@ document.querySelectorAll(".card").forEach((card, i) => {
   });
 });
 </script>
+  <script>
+document.querySelectorAll(".card").forEach(card => {
+  const h = card.querySelector("h2, h3");
+  const name = h ? h.textContent : "";
+  card.querySelectorAll("button, a").forEach(b => {
+    if (b.textContent.trim() === "Trailer") {
+      b.addEventListener("click", () => {
+        const l = document.getElementById("tl");
+        l.textContent = "Hindi trailer YouTube par dekhein";
+        l.href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(name + " trailer Hindi");
+      });
+    }
+  });
+});
+</script>
+  <script>
+document.querySelectorAll(".card").forEach(card => {
+  const h = card.querySelector("h2, h3");
+  const name = h ? h.textContent : "";
+  card.querySelectorAll("button, a").forEach(b => {
+    if (b.textContent.trim() === "Watch") {
+      b.textContent = "Stream";
+      b.removeAttribute("href");
+      b.onclick = () => window.open(
+        "https://www.justwatch.com/us/search?q=" + encodeURIComponent(name),
+        "_blank"
+      );
+    }
+  });
+});
+</script>
 </body>
 </html>
