@@ -238,5 +238,38 @@ searchBox.addEventListener("input", function () {
   });
 });
 </script>
+  <script>
+const movies = [
+  {title:"Deadpool & Wolverine", info:"2024 • Action", q:"Deadpool & Wolverine official trailer"},
+  {title:"Wonder Woman 1984", info:"2020 • Action", q:"Wonder Woman 1984 official trailer"},
+  {title:"The Super Mario Bros. Movie", info:"2023 • Animation", q:"The Super Mario Bros. Movie official trailer"},
+  {title:"Dune: Part Two", info:"2024 • Sci-Fi", q:"Dune Part Two official trailer"}
+];
+
+document.querySelectorAll(".card").forEach((card, i) => {
+  const m = movies[i];
+  if (!m) return;
+
+  const h = card.querySelector("h2, h3");
+  if (h) h.textContent = m.title;
+
+  card.querySelectorAll("p, span, div").forEach(el => {
+    if (el.children.length === 0 && /^\s*2026/.test(el.textContent)) {
+      el.textContent = m.info;
+    }
+  });
+
+  card.querySelectorAll("button, a").forEach(b => {
+    if (b.textContent.trim() === "Trailer") {
+      b.removeAttribute("onclick");
+      b.removeAttribute("href");
+      b.onclick = () => window.open(
+        "https://www.youtube.com/results?search_query=" + encodeURIComponent(m.q),
+        "_blank"
+      );
+    }
+  });
+});
+</script>
 </body>
 </html>
