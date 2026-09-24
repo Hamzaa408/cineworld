@@ -271,5 +271,41 @@ document.querySelectorAll(".card").forEach((card, i) => {
   });
 });
 </script>
+<style>
+#tm{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:999;padding:12px}
+#tm iframe{width:100%;max-width:700px;aspect-ratio:16/9;border:0;border-radius:12px}
+#tm a{color:#fff;margin-top:16px}
+#tm button{margin-top:14px;background:#e50914;color:#fff;border:0;padding:10px 24px;border-radius:8px;font-size:16px}
+</style>
+
+<div id="tm">
+  <iframe id="tf" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+  <a id="tl" target="_blank">YouTube par kholein</a>
+  <button onclick="closeT()">Band karein</button>
+</div>
+
+<script>
+const ids = ["73_1biulkYk","sfM7_JLk-84","TnGl01FkMMo","Way9Dexny3w"];
+
+function closeT(){
+  document.getElementById("tm").style.display = "none";
+  document.getElementById("tf").src = "";
+}
+
+document.querySelectorAll(".card").forEach((card, i) => {
+  if (!ids[i]) return;
+  const h = card.querySelector("h2, h3");
+  const name = h ? h.textContent : "";
+  card.querySelectorAll("button, a").forEach(b => {
+    if (b.textContent.trim() === "Trailer") {
+      b.onclick = () => {
+        document.getElementById("tf").src = "https://www.youtube.com/embed/" + ids[i] + "?autoplay=1";
+        document.getElementById("tl").href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(name + " official trailer");
+        document.getElementById("tm").style.display = "flex";
+      };
+    }
+  });
+});
+</script>
 </body>
 </html>
