@@ -338,5 +338,19 @@ document.querySelectorAll(".card").forEach(card => {
   });
 });
 </script>
+  <script>
+document.querySelectorAll(".card").forEach(card => {
+  const h = card.querySelector("h2, h3");
+  const name = h ? h.textContent : "";
+  card.querySelectorAll("button, a").forEach(b => {
+    if (b.textContent.trim() === "Stream") {
+      b.onclick = () => window.open(
+        "https://www.justwatch.com/pk/search?q=" + encodeURIComponent(name),
+        "_blank"
+      );
+    }
+  });
+});
+</script>
 </body>
 </html>
