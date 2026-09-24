@@ -227,6 +227,16 @@ function comingSoon(){
 alert("Movie link will be added soon.");
 }
 </script>
-
+<script>
+const searchBox = document.querySelector("input");
+searchBox.addEventListener("input", function () {
+  const text = this.value.toLowerCase().trim();
+  document.querySelectorAll(".card").forEach(card => {
+    const h = card.querySelector("h2, h3");
+    const title = h ? h.textContent.toLowerCase() : "";
+    card.style.display = title.includes(text) ? "" : "none";
+  });
+});
+</script>
 </body>
 </html>
