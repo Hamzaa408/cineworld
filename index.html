@@ -352,5 +352,40 @@ document.querySelectorAll(".card").forEach(card => {
   });
 });
 </script>
+  <script>
+const reviews = [
+  {
+    t:"Deadpool & Wolverine (2024)",
+    r:"Ryan Reynolds aur Hugh Jackman pehli baar screen share karte hain, aur ye jodi expectations se zyada mazedaar nikalti hai. Kahani halki hai, lekin fourth-wall jokes, nostalgia aur action sequences is film ko entertaining banate hain. Fans ke liye cameos ek treat hain. Rating: 8/10."
+  },
+  {
+    t:"Wonder Woman 1984",
+    r:"Gal Gadot ek baar phir Diana Prince ke roop mein wapas aati hain, is baar 1980s ke rangeen duniya mein. Visuals aur costume design kamaal ke hain, lekin story kuch jagah dheeli lagti hai. Pedro Pascal ka villain wala kirdar yaad rehta hai. Family ke saath dekhne layak film. Rating: 6.5/10."
+  },
+  {
+    t:"The Super Mario Bros. Movie",
+    r:"Video game duniya bilkul sahi andaz mein screen par utaari gayi hai. Rang-birangi animation, tez raftaar kahani aur mashoor characters ise bachon aur bade dono ke liye behtareen banate hain. Chris Pratt ki awaz thori alag lagti hai, lekin overall film bohat maza deti hai. Rating: 7.5/10."
+  },
+  {
+    t:"Dune: Part Two",
+    r:"Denis Villeneuve ne is sci-fi epic ko aur bhi bada aur behtareen bana diya hai. Cinematography, sound design aur performances (khas kar Timothée Chalamet aur Zendaya) is film ko is saal ki behtareen movies mein shamil karte hain. Dheemi shuruaat ke baad film apni raftaar pakar leti hai. Rating: 9/10."
+  }
+];
+
+document.querySelectorAll(".card").forEach((card, i) => {
+  const rv = reviews[i];
+  if (!rv) return;
+  const btn = document.createElement("button");
+  btn.textContent = "Review";
+  btn.style.cssText = "margin-left:6px;background:#333;color:#fff;border:0;padding:10px 16px;border-radius:6px;font-size:15px";
+  const watchBtn = [...card.querySelectorAll("button, a")].find(b => b.textContent.trim() === "Trailer");
+  if (watchBtn) watchBtn.after(btn);
+  btn.onclick = () => {
+    document.getElementById("tf").src = "";
+    document.getElementById("tm").style.display = "none";
+    alert(rv.t + "\n\n" + rv.r);
+  };
+});
+</script>
 </body>
 </html>
