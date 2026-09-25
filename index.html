@@ -4,132 +4,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CineWorld</title>
-
 <style>
 *{box-sizing:border-box}
-
-body{
-margin:0;
-background:#0b0b0b;
-color:white;
-font-family:Arial,sans-serif;
-}
-
-header{
-padding:25px 15px;
-background:#151515;
-text-align:center;
-}
-
-.logo{
-font-size:34px;
-font-weight:bold;
-color:#e50914;
-}
-
-header p{
-color:#aaa;
-margin:8px 0 0;
-}
-
-.search{
-display:block;
-width:90%;
-max-width:600px;
-margin:25px auto;
-padding:15px;
-border:1px solid #333;
-border-radius:10px;
-background:#1b1b1b;
-color:white;
-font-size:16px;
-outline:none;
-}
-
-h1{
-text-align:center;
-margin:30px 0 20px;
-}
-
-.movies{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:15px;
-padding:15px;
-max-width:1200px;
-margin:auto;
-}
-
-.card{
-background:#171717;
-border-radius:12px;
-overflow:hidden;
-box-shadow:0 4px 15px #000;
-}
-
-.poster{
-height:250px;
-background:#292929;
-display:flex;
-align-items:center;
-justify-content:center;
-overflow:hidden;
-}
-
-.poster img{
-width:100%;
-height:100%;
-object-fit:cover;
-}
-
-.info{
-padding:14px;
-}
-
-.info h2{
-font-size:18px;
-margin:0 0 8px;
-}
-
-.info p{
-color:#aaa;
-margin:5px 0 12px;
-}
-
-.buttons{
-display:flex;
-gap:8px;
-}
-
-.btn{
-flex:1;
-padding:10px;
-border:0;
-border-radius:7px;
-font-weight:bold;
-text-align:center;
-text-decoration:none;
-cursor:pointer;
-}
-
-.watch{
-background:#e50914;
-color:white;
-}
-
-.trailer{
-background:#333;
-color:white;
-}
-
-@media(min-width:700px){
-.movies{
-grid-template-columns:repeat(4,1fr);
-}
-}
+body{margin:0;background:#0b0b0b;color:white;font-family:Arial,sans-serif}
+header{padding:25px 15px;background:#151515;text-align:center}
+.logo{font-size:34px;font-weight:bold;color:#e50914}
+header p{color:#aaa;margin:8px 0 0}
+.search{display:block;width:90%;max-width:600px;margin:25px auto;padding:15px;border:1px solid #333;border-radius:10px;background:#1b1b1b;color:white;font-size:16px;outline:none}
+h1{text-align:center;margin:30px 0 20px}
+.movies{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;padding:15px;max-width:1200px;margin:auto}
+.card{background:#171717;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px #000}
+.poster{height:250px;background:#292929;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.poster img{width:100%;height:100%;object-fit:cover}
+.info{padding:14px}
+.info h2{font-size:18px;margin:0 0 8px}
+.info p{color:#aaa;margin:5px 0 12px}
+.buttons{display:flex;gap:8px;flex-wrap:wrap}
+.btn{flex:1;min-width:70px;padding:10px;border:0;border-radius:7px;font-weight:bold;text-align:center;text-decoration:none;cursor:pointer;color:white;font-size:14px}
+.watch{background:#e50914}
+.trailer{background:#333}
+.review{background:#2a5d8f}
+@media(min-width:700px){.movies{grid-template-columns:repeat(4,1fr)}}
+#tm{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:999;padding:12px}
+#tm iframe{width:100%;max-width:700px;aspect-ratio:16/9;border:0;border-radius:12px}
+#tm a{color:#fff;margin-top:16px}
+#tm button{margin-top:14px;background:#e50914;color:#fff;border:0;padding:10px 24px;border-radius:8px;font-size:16px}
+#rm{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:999;padding:20px}
+#rm .box{background:#171717;max-width:500px;padding:24px;border-radius:12px}
+#rm h3{margin-top:0;color:#e50914}
+#rm button{margin-top:16px;background:#333;color:#fff;border:0;padding:10px 24px;border-radius:8px}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -137,255 +42,118 @@ grid-template-columns:repeat(4,1fr);
 <p>Movies • Reviews • Trailers</p>
 </header>
 
-<input
-class="search"
-id="search"
-type="text"
-placeholder="Search movies..."
-onkeyup="searchMovies()"
->
+<input class="search" id="search" type="text" placeholder="Search movies...">
 
 <h1>Latest Movies</h1>
 
-<div class="movies" id="movieList">
-
-<div class="card">
-<div class="poster">
-<img src="https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg" alt="Movie poster">
-</div>
-<div class="info">
-<h2>Example Movie</h2>
-<p>2026 • Action</p>
-<div class="buttons">
-<a class="btn watch" href="#" onclick="comingSoon()">Watch</a>
-<a class="btn trailer" href="#" onclick="comingSoon()">Trailer</a>
-</div>
-</div>
-</div>
-
-<div class="card">
-<div class="poster">
-<img src="https://image.tmdb.org/t/p/w500/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg" alt="Movie poster">
-</div>
-<div class="info">
-<h2>Example Drama</h2>
-<p>2026 • Drama</p>
-<div class="buttons">
-<a class="btn watch" href="#" onclick="comingSoon()">Watch</a>
-<a class="btn trailer" href="#" onclick="comingSoon()">Trailer</a>
-</div>
-</div>
-</div>
-
-<div class="card">
-<div class="poster">
-<img src="https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg" alt="Movie poster">
-</div>
-<div class="info">
-<h2>Example Comedy</h2>
-<p>2026 • Comedy</p>
-<div class="buttons">
-<a class="btn watch" href="#" onclick="comingSoon()">Watch</a>
-<a class="btn trailer" href="#" onclick="comingSoon()">Trailer</a>
-</div>
-</div>
-</div>
-
-<div class="card">
-<div class="poster">
-<img src="https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" alt="Movie poster">
-</div>
-<div class="info">
-<h2>Example Adventure</h2>
-<p>2026 • Adventure</p>
-<div class="buttons">
-<a class="btn watch" href="#" onclick="comingSoon()">Watch</a>
-<a class="btn trailer" href="#" onclick="comingSoon()">Trailer</a>
-</div>
-</div>
-</div>
-
-</div>
-
-<script>
-function searchMovies(){
-let input=document.getElementById("search").value.toLowerCase();
-let cards=document.querySelectorAll(".card");
-
-cards.forEach(card=>{
-let title=card.querySelector("h2").innerText.toLowerCase();
-
-if(title.includes(input)){
-card.style.display="";
-}else{
-card.style.display="none";
-}
-});
-}
-
-function comingSoon(){
-alert("Movie link will be added soon.");
-}
-</script>
-<script>
-const searchBox = document.querySelector("input");
-searchBox.addEventListener("input", function () {
-  const text = this.value.toLowerCase().trim();
-  document.querySelectorAll(".card").forEach(card => {
-    const h = card.querySelector("h2, h3");
-    const title = h ? h.textContent.toLowerCase() : "";
-    card.style.display = title.includes(text) ? "" : "none";
-  });
-});
-</script>
-  <script>
-const movies = [
-  {title:"Deadpool & Wolverine", info:"2024 • Action", q:"Deadpool & Wolverine official trailer"},
-  {title:"Wonder Woman 1984", info:"2020 • Action", q:"Wonder Woman 1984 official trailer"},
-  {title:"The Super Mario Bros. Movie", info:"2023 • Animation", q:"The Super Mario Bros. Movie official trailer"},
-  {title:"Dune: Part Two", info:"2024 • Sci-Fi", q:"Dune Part Two official trailer"}
-];
-
-document.querySelectorAll(".card").forEach((card, i) => {
-  const m = movies[i];
-  if (!m) return;
-
-  const h = card.querySelector("h2, h3");
-  if (h) h.textContent = m.title;
-
-  card.querySelectorAll("p, span, div").forEach(el => {
-    if (el.children.length === 0 && /^\s*2026/.test(el.textContent)) {
-      el.textContent = m.info;
-    }
-  });
-
-  card.querySelectorAll("button, a").forEach(b => {
-    if (b.textContent.trim() === "Trailer") {
-      b.removeAttribute("onclick");
-      b.removeAttribute("href");
-      b.onclick = () => window.open(
-        "https://www.youtube.com/results?search_query=" + encodeURIComponent(m.q),
-        "_blank"
-      );
-    }
-  });
-});
-</script>
-<style>
-#tm{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:999;padding:12px}
-#tm iframe{width:100%;max-width:700px;aspect-ratio:16/9;border:0;border-radius:12px}
-#tm a{color:#fff;margin-top:16px}
-#tm button{margin-top:14px;background:#e50914;color:#fff;border:0;padding:10px 24px;border-radius:8px;font-size:16px}
-</style>
+<div class="movies" id="movieList"></div>
 
 <div id="tm">
   <iframe id="tf" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-  <a id="tl" target="_blank">YouTube par kholein</a>
-  <button onclick="closeT()">Band karein</button>
+  <a id="tl" target="_blank">Hindi trailer YouTube par dekhein</a>
+  <button onclick="closeTrailer()">Band karein</button>
+</div>
+
+<div id="rm">
+  <div class="box">
+    <h3 id="rmTitle"></h3>
+    <p id="rmText"></p>
+    <button onclick="closeReview()">Band karein</button>
+  </div>
 </div>
 
 <script>
-const ids = ["73_1biulkYk","sfM7_JLk-84","TnGl01FkMMo","Way9Dexny3w"];
+// ===== YAHAN NAYI MOVIE ADD KAREIN =====
+const movies = [
+  {
+    title: "Deadpool & Wolverine",
+    year: "2024",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+    trailerId: "73_1biulkYk",
+    review: "Ryan Reynolds aur Hugh Jackman pehli baar screen share karte hain, aur ye jodi expectations se zyada mazedaar nikalti hai. Kahani halki hai, lekin fourth-wall jokes, nostalgia aur action sequences is film ko entertaining banate hain. Rating: 8/10."
+  },
+  {
+    title: "Wonder Woman 1984",
+    year: "2020",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
+    trailerId: "sfM7_JLk-84",
+    review: "Gal Gadot ek baar phir Diana Prince ke roop mein wapas aati hain, is baar 1980s ke rangeen duniya mein. Visuals aur costume design kamaal ke hain, lekin story kuch jagah dheeli lagti hai. Rating: 6.5/10."
+  },
+  {
+    title: "The Super Mario Bros. Movie",
+    year: "2023",
+    genre: "Animation",
+    poster: "https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",
+    trailerId: "TnGl01FkMMo",
+    review: "Video game duniya bilkul sahi andaz mein screen par utaari gayi hai. Rang-birangi animation, tez raftaar kahani aur mashoor characters ise bachon aur bade dono ke liye behtareen banate hain. Rating: 7.5/10."
+  },
+  {
+    title: "Dune: Part Two",
+    year: "2024",
+    genre: "Sci-Fi",
+    poster: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+    trailerId: "Way9Dexny3w",
+    review: "Denis Villeneuve ne is sci-fi epic ko aur bhi bada aur behtareen bana diya hai. Cinematography, sound design aur performances is film ko is saal ki behtareen movies mein shamil karte hain. Rating: 9/10."
+  }
+];
+// ===== YAHAN TAK =====
 
-function closeT(){
+const list = document.getElementById("movieList");
+
+function render(){
+  list.innerHTML = "";
+  movies.forEach((m, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="poster"><img src="${m.poster}" alt="${m.title}"></div>
+      <div class="info">
+        <h2>${m.title}</h2>
+        <p>${m.year} • ${m.genre}</p>
+        <div class="buttons">
+          <a class="btn watch" href="#">Stream</a>
+          <a class="btn trailer" href="#">Trailer</a>
+          <a class="btn review" href="#">Review</a>
+        </div>
+      </div>`;
+    card.querySelector(".watch").onclick = (e) => {
+      e.preventDefault();
+      window.open("https://www.justwatch.com/pk/search?q=" + encodeURIComponent(m.title), "_blank");
+    };
+    card.querySelector(".trailer").onclick = (e) => {
+      e.preventDefault();
+      document.getElementById("tf").src = "https://www.youtube.com/embed/" + m.trailerId + "?autoplay=1";
+      document.getElementById("tl").href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(m.title + " trailer Hindi");
+      document.getElementById("tm").style.display = "flex";
+    };
+    card.querySelector(".review").onclick = (e) => {
+      e.preventDefault();
+      document.getElementById("rmTitle").textContent = m.title + " (" + m.year + ")";
+      document.getElementById("rmText").textContent = m.review;
+      document.getElementById("rm").style.display = "flex";
+    };
+    list.appendChild(card);
+  });
+}
+
+function closeTrailer(){
   document.getElementById("tm").style.display = "none";
   document.getElementById("tf").src = "";
 }
+function closeReview(){
+  document.getElementById("rm").style.display = "none";
+}
 
-document.querySelectorAll(".card").forEach((card, i) => {
-  if (!ids[i]) return;
-  const h = card.querySelector("h2, h3");
-  const name = h ? h.textContent : "";
-  card.querySelectorAll("button, a").forEach(b => {
-    if (b.textContent.trim() === "Trailer") {
-      b.onclick = () => {
-        document.getElementById("tf").src = "https://www.youtube.com/embed/" + ids[i] + "?autoplay=1";
-        document.getElementById("tl").href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(name + " official trailer");
-        document.getElementById("tm").style.display = "flex";
-      };
-    }
+document.getElementById("search").addEventListener("input", function(){
+  const text = this.value.toLowerCase().trim();
+  document.querySelectorAll(".card").forEach((card, i) => {
+    card.style.display = movies[i].title.toLowerCase().includes(text) ? "" : "none";
   });
 });
-</script>
-  <script>
-document.querySelectorAll(".card").forEach(card => {
-  const h = card.querySelector("h2, h3");
-  const name = h ? h.textContent : "";
-  card.querySelectorAll("button, a").forEach(b => {
-    if (b.textContent.trim() === "Trailer") {
-      b.addEventListener("click", () => {
-        const l = document.getElementById("tl");
-        l.textContent = "Hindi trailer YouTube par dekhein";
-        l.href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(name + " trailer Hindi");
-      });
-    }
-  });
-});
-</script>
-  <script>
-document.querySelectorAll(".card").forEach(card => {
-  const h = card.querySelector("h2, h3");
-  const name = h ? h.textContent : "";
-  card.querySelectorAll("button, a").forEach(b => {
-    if (b.textContent.trim() === "Watch") {
-      b.textContent = "Stream";
-      b.removeAttribute("href");
-      b.onclick = () => window.open(
-        "https://www.justwatch.com/us/search?q=" + encodeURIComponent(name),
-        "_blank"
-      );
-    }
-  });
-});
-</script>
-  <script>
-document.querySelectorAll(".card").forEach(card => {
-  const h = card.querySelector("h2, h3");
-  const name = h ? h.textContent : "";
-  card.querySelectorAll("button, a").forEach(b => {
-    if (b.textContent.trim() === "Stream") {
-      b.onclick = () => window.open(
-        "https://www.justwatch.com/pk/search?q=" + encodeURIComponent(name),
-        "_blank"
-      );
-    }
-  });
-});
-</script>
-  <script>
-const reviews = [
-  {
-    t:"Deadpool & Wolverine (2024)",
-    r:"Ryan Reynolds aur Hugh Jackman pehli baar screen share karte hain, aur ye jodi expectations se zyada mazedaar nikalti hai. Kahani halki hai, lekin fourth-wall jokes, nostalgia aur action sequences is film ko entertaining banate hain. Fans ke liye cameos ek treat hain. Rating: 8/10."
-  },
-  {
-    t:"Wonder Woman 1984",
-    r:"Gal Gadot ek baar phir Diana Prince ke roop mein wapas aati hain, is baar 1980s ke rangeen duniya mein. Visuals aur costume design kamaal ke hain, lekin story kuch jagah dheeli lagti hai. Pedro Pascal ka villain wala kirdar yaad rehta hai. Family ke saath dekhne layak film. Rating: 6.5/10."
-  },
-  {
-    t:"The Super Mario Bros. Movie",
-    r:"Video game duniya bilkul sahi andaz mein screen par utaari gayi hai. Rang-birangi animation, tez raftaar kahani aur mashoor characters ise bachon aur bade dono ke liye behtareen banate hain. Chris Pratt ki awaz thori alag lagti hai, lekin overall film bohat maza deti hai. Rating: 7.5/10."
-  },
-  {
-    t:"Dune: Part Two",
-    r:"Denis Villeneuve ne is sci-fi epic ko aur bhi bada aur behtareen bana diya hai. Cinematography, sound design aur performances (khas kar Timothée Chalamet aur Zendaya) is film ko is saal ki behtareen movies mein shamil karte hain. Dheemi shuruaat ke baad film apni raftaar pakar leti hai. Rating: 9/10."
-  }
-];
 
-document.querySelectorAll(".card").forEach((card, i) => {
-  const rv = reviews[i];
-  if (!rv) return;
-  const btn = document.createElement("button");
-  btn.textContent = "Review";
-  btn.style.cssText = "margin-left:6px;background:#333;color:#fff;border:0;padding:10px 16px;border-radius:6px;font-size:15px";
-  const watchBtn = [...card.querySelectorAll("button, a")].find(b => b.textContent.trim() === "Trailer");
-  if (watchBtn) watchBtn.after(btn);
-  btn.onclick = () => {
-    document.getElementById("tf").src = "";
-    document.getElementById("tm").style.display = "none";
-    alert(rv.t + "\n\n" + rv.r);
-  };
-});
+render();
 </script>
 </body>
 </html>
