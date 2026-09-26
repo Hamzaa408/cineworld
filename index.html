@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CineWorld</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0b0b0b;color:white;font-family:Arial,sans-serif}
@@ -25,6 +27,10 @@ h1{text-align:center;margin:30px 0 20px}
 .trailer{background:#333}
 .review{background:#2a5d8f}
 .status{display:inline-block;margin:4px 0 8px;padding:3px 10px;border-radius:5px;font-size:12px;font-weight:bold}
+.stars{margin:6px 0;font-size:22px;cursor:pointer;letter-spacing:2px}
+.stars span{color:#555}
+.stars span.active{color:#ffd700}
+.avgRating{font-size:12px;color:#aaa;margin:2px 0 8px}
 @media(min-width:700px){.movies{grid-template-columns:repeat(4,1fr)}}
 #tm{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:999;padding:12px}
 #tm iframe{width:100%;max-width:700px;aspect-ratio:16/9;border:0;border-radius:12px}
@@ -64,8 +70,20 @@ h1{text-align:center;margin:30px 0 20px}
 </div>
 
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA4_Mwnnt0E_SMW4hh9ocZ1zGbVQVX1gZs",
+  authDomain: "cineworld-a2b24.firebaseapp.com",
+  projectId: "cineworld-a2b24",
+  storageBucket: "cineworld-a2b24.firebasestorage.app",
+  messagingSenderId: "243495095408",
+  appId: "1:243495095408:web:9ba1eea4fd710f049878b5"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 const movies = [
   {
+    id: "deadpool-wolverine",
     title: "Deadpool & Wolverine",
     year: "2024",
     genre: "Action",
@@ -78,6 +96,7 @@ const movies = [
     review: "Ryan Reynolds aur Hugh Jackman pehli baar screen share karte hain, aur ye jodi expectations se zyada mazedaar nikalti hai. Kahani halki hai, lekin fourth-wall jokes, nostalgia aur action sequences is film ko entertaining banate hain. Rating: 8/10."
   },
   {
+    id: "wonder-woman-1984",
     title: "Wonder Woman 1984",
     year: "2020",
     genre: "Action",
@@ -90,6 +109,7 @@ const movies = [
     review: "Gal Gadot ek baar phir Diana Prince ke roop mein wapas aati hain, is baar 1980s ke rangeen duniya mein. Visuals aur costume design kamaal ke hain, lekin story kuch jagah dheeli lagti hai. Rating: 6.5/10."
   },
   {
+    id: "super-mario-bros-movie",
     title: "The Super Mario Bros. Movie",
     year: "2023",
     genre: "Animation",
@@ -102,6 +122,7 @@ const movies = [
     review: "Video game duniya bilkul sahi andaz mein screen par utaari gayi hai. Rang-birangi animation, tez raftaar kahani aur mashoor characters ise bachon aur bade dono ke liye behtareen banate hain. Rating: 7.5/10."
   },
   {
+    id: "dune-part-two",
     title: "Dune: Part Two",
     year: "2024",
     genre: "Sci-Fi",
@@ -114,6 +135,7 @@ const movies = [
     review: "Denis Villeneuve ne is sci-fi epic ko aur bhi bada aur behtareen bana diya hai. Cinematography, sound design aur performances is film ko is saal ki behtareen movies mein shamil karte hain. Rating: 9/10."
   },
   {
+    id: "spiderman-no-way-home",
     title: "Spider-Man: No Way Home",
     year: "2021",
     genre: "Action",
@@ -126,6 +148,7 @@ const movies = [
     review: "Peter Parker ki pehchan sab ke saamne aane ke baad kahani multiverse ki taraf mudti hai, jahan purani Spider-Man films ke villains wapas aate hain. Tom Holland, Zendaya aur Benedict Cumberbatch ki performances aur emotional climax ise MCU ki behtareen films mein shamil karte hain. Rating: 9/10."
   },
   {
+    id: "avengers-endgame",
     title: "Avengers: Endgame",
     year: "2019",
     genre: "Action",
@@ -138,6 +161,7 @@ const movies = [
     review: "Marvel ki das saal ki kahani ka epic anjaam. Har character ko poora waqt milta hai, aur climax ki 'assemble' scene fans ke liye emotional aur satisfying dono hai. Lambi film hai lekin har minute maza deti hai. Rating: 9.5/10."
   },
   {
+    id: "avengers-doomsday",
     title: "Avengers: Doomsday",
     year: "2026",
     genre: "Action (Coming Soon)",
@@ -159,9 +183,53 @@ function statusColor(s){
   return "#2e7d32";
 }
 
+function starsHTML(movieId, current){
+  let h = "";
+  for (let i = 1; i <= 5; i++){
+    h += `<span data-id="${movieId}" data-val="${i}" class="${i <= current ? 'active' : ''}">★</span>`;
+  }
+  return h;
+}
+
+async function loadRating(movieId, container){
+  try {
+    const doc = await db.collection("ratings").doc(movieId).get();
+    if (doc.exists){
+      const d = doc.data();
+      const avg = (d.total / d.count).toFixed(1);
+      container.querySelector(".avgRating").textContent = `${avg} ⭐ - ${d.count} votes`;
+    } else {
+      container.querySelector(".avgRating").textContent = "Abhi koi rating nahi";
+    }
+  } catch(e){
+    container.querySelector(".avgRating").textContent = "";
+  }
+}
+
+async function submitRating(movieId, val, container){
+  const ref = db.collection("ratings").doc(movieId);
+  try {
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      if (doc.exists){
+        const d = doc.data();
+        t.update(ref, { total: d.total + val, count: d.count + 1 });
+      } else {
+        t.set(ref, { total: val, count: 1 });
+      }
+    });
+    loadRating(movieId, container);
+    container.querySelectorAll(".stars span").forEach(s => {
+      s.classList.toggle("active", parseInt(s.dataset.val) <= val);
+    });
+  } catch(e){
+    alert("Rating save nahi hui, dobara try karein.");
+  }
+}
+
 function render(){
   list.innerHTML = "";
-  movies.forEach((m, i) => {
+  movies.forEach((m) => {
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
@@ -172,6 +240,8 @@ function render(){
         <p style="color:#ffd700;font-size:13px">${m.rating || ""}</p>
         <span class="status" style="background:${statusColor(m.status)}">${m.status || ""}</span>
         <p style="font-size:12px">Budget: ${m.budget || "N/A"} | Box Office: ${m.boxOffice || "N/A"}</p>
+        <div class="stars">${starsHTML(m.id, 0)}</div>
+        <p class="avgRating">Loading...</p>
         <div class="buttons">
           <a class="btn watch" href="#">Stream</a>
           <a class="btn trailer" href="#">Trailer</a>
@@ -194,7 +264,11 @@ function render(){
       document.getElementById("rmText").textContent = m.review;
       document.getElementById("rm").style.display = "flex";
     };
+    card.querySelectorAll(".stars span").forEach(s => {
+      s.onclick = () => submitRating(m.id, parseInt(s.dataset.val), card);
+    });
     list.appendChild(card);
+    loadRating(m.id, card);
   });
 }
 
