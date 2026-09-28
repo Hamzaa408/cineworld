@@ -730,7 +730,7 @@ function render(){
       </div>`;
     card.querySelector(".watch").onclick = (e) => {
       e.preventDefault();
-      window.open("https://www.justwatch.com/pk/search?q=" + encodeURIComponent(m.title), "_blank");
+      window.open("https://www.google.com/search?hl=en&q=" + encodeURIComponent(m.title + " where to watch"), "_blank");
     };
     card.querySelector(".trailer").onclick = (e) => {
       e.preventDefault();
@@ -768,6 +768,45 @@ document.getElementById("search").addEventListener("input", function(){
 });
 
 render();
+</script>
+  <script>
+function getVote(id){ try { return localStorage.getItem("voted_" + id); } catch(e){ return null; } }
+function saveVote(id, val){ try { localStorage.setItem("voted_" + id, val); } catch(e){} }
+
+async function submitRating(movieId, val, container){
+  if (getVote(movieId)){
+    alert("Aap is movie ko pehle hi rate kar chuke hain. Shukriya!");
+    return;
+  }
+  const ref = db.collection("ratings").doc(movieId);
+  try {
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      if (doc.exists){
+        const d = doc.data();
+        t.update(ref, { total: d.total + val, count: d.count + 1 });
+      } else {
+        t.set(ref, { total: val, count: 1 });
+      }
+    });
+    saveVote(movieId, val);
+    loadRating(movieId, container);
+    container.querySelectorAll(".stars span").forEach(s => {
+      s.classList.toggle("active", parseInt(s.dataset.val) <= val);
+    });
+  } catch(e){
+    alert("Rating save nahi hui, dobara try karein.");
+  }
+}
+
+document.querySelectorAll(".card").forEach((card, i) => {
+  const v = getVote(movies[i].id);
+  if (v){
+    card.querySelectorAll(".stars span").forEach(s => {
+      s.classList.toggle("active", parseInt(s.dataset.val) <= parseInt(v));
+    });
+  }
+});
 </script>
 </body>
 </html>
