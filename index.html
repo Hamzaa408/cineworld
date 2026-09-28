@@ -364,4 +364,171 @@ const movies = [
     review:"Hazaron saal se dharti ki hifazat karne wali immortal team ki kahani. Bara cast aur khoobsurat visuals, lekin kahani kuch logon ko dheemi lagi."
   },
   {
-    id:"quantumania-2023", title:"Ant-Man and the Wasp: Quantumania (20
+    id:"quantumania-2023", title:"Ant-Man and the Wasp: Quantumania (2023)", year:"2023", genre:"Action, Comedy",
+    poster:"https://image.tmdb.org/t/p/w500/qnqGbB22YJ7dSs4o6m7exTpEuP.jpg",
+    trailerId:"", rating:"IMDb 6.0 • RT 46%",
+    budget:"$200 million", boxOffice:"$476 million", status:"Super Hit",
+    review:"Ant-Man ki family Quantum Realm mein phans jati hai, jahan Kang ka khatra samne aata hai. Visuals bohat hain, lekin critics ko kahani kamzor lagi."
+  },
+  {
+    id:"the-marvels-2023", title:"The Marvels (2023)", year:"2023", genre:"Action, Sci-Fi",
+    poster:"https://image.tmdb.org/t/p/w500/9GBhzXMFjgcZ3FdR9w3bUMMTps.jpg",
+    trailerId:"", rating:"IMDb 5.5 • RT 62%",
+    budget:"$270 million", boxOffice:"$206 million", status:"Flop",
+    review:"Captain Marvel, Monica Rambeau aur Ms. Marvel ki team-up, jab teenon ki taqatein aapas mein badalne lagti hain. Chhoti aur tez raftaar film, magar box office par kamzor rahi."
+  },
+  {
+    id:"captain-america-brave-new-world-2025", title:"Captain America: Brave New World (2025)", year:"2025", genre:"Action, Thriller",
+    poster:"https://image.tmdb.org/t/p/w500/pzIddUEMWhWzfvLI3TwxT1w5Tp.jpg",
+    trailerId:"", rating:"IMDb 7.1 • RT 85%",
+    budget:"$250 million", boxOffice:"$415 million", status:"Blockbuster",
+    review:"Sam Wilson ka pehla bada solo mission as Captain America, jahan Red Hulk ka khatra hai. Political thriller wala andaz."
+  },
+  {
+    id:"thunderbolts-2025", title:"Thunderbolts* (2025)", year:"2025", genre:"Action, Comedy",
+    poster:"https://image.tmdb.org/t/p/w500/m9EtP1Yrzv6v7dMaAp4o8aT5oUM.jpg",
+    trailerId:"", rating:"IMDb 7.5 • RT 88%",
+    budget:"$200 million", boxOffice:"$380 million", status:"Most Awaited",
+    review:"Anti-heroes ki misfit team ek khatarnak mission par. Dark comedy aur emotional touch ke saath alag qism ki Marvel film."
+  }
+];
+// ===== YAHAN TAK =====
+
+const list = document.getElementById("movieList");
+
+function statusColor(s){
+  if (s === "Flop") return "#e50914";
+  if (s === "Coming Soon") return "#555";
+  if (s === "Average") return "#e67e22";
+  return "#2e7d32";
+}
+
+function fallbackPoster(t){
+  t = String(t);
+  const s = t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const fs = Math.max(14, Math.min(34, Math.floor(460 / (t.length * 0.55))));
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="750"><rect width="100%" height="100%" fill="#222"/><text x="50%" y="48%" fill="#e50914" font-size="' + fs + '" font-family="Arial" font-weight="bold" text-anchor="middle">' + s + '</text><text x="50%" y="56%" fill="#aaa" font-size="22" font-family="Arial" text-anchor="middle">Poster jald add hoga</text></svg>';
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+
+function getVote(id){ try { return localStorage.getItem("voted_" + id); } catch(e){ return null; } }
+function saveVote(id, val){ try { localStorage.setItem("voted_" + id, val); } catch(e){} }
+
+function starsHTML(movieId, current){
+  let h = "";
+  for (let i = 1; i <= 5; i++){
+    h += `<span data-id="${movieId}" data-val="${i}" class="${i <= current ? 'active' : ''}">★</span>`;
+  }
+  return h;
+}
+
+async function loadRating(movieId, container){
+  try {
+    const doc = await db.collection("ratings").doc(movieId).get();
+    if (doc.exists){
+      const d = doc.data();
+      const avg = (d.total / d.count).toFixed(1);
+      container.querySelector(".avgRating").textContent = `${avg} ⭐ - ${d.count} votes`;
+    } else {
+      container.querySelector(".avgRating").textContent = "Abhi koi rating nahi";
+    }
+  } catch(e){
+    container.querySelector(".avgRating").textContent = "";
+  }
+}
+
+async function submitRating(movieId, val, container){
+  if (getVote(movieId)){
+    alert("Aap is movie ko pehle hi rate kar chuke hain. Shukriya!");
+    return;
+  }
+  const ref = db.collection("ratings").doc(movieId);
+  try {
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      if (doc.exists){
+        const d = doc.data();
+        t.update(ref, { total: d.total + val, count: d.count + 1 });
+      } else {
+        t.set(ref, { total: val, count: 1 });
+      }
+    });
+    saveVote(movieId, val);
+    loadRating(movieId, container);
+    container.querySelectorAll(".stars span").forEach(s => {
+      s.classList.toggle("active", parseInt(s.dataset.val) <= val);
+    });
+  } catch(e){
+    alert("Rating save nahi hui, dobara try karein.");
+  }
+}
+
+function render(){
+  list.innerHTML = "";
+  movies.forEach((m) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="poster"><img src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.onerror=null;this.src=fallbackPoster(this.alt)"></div>
+      <div class="info">
+        <h2>${m.title}</h2>
+        <p>${m.year} • ${m.genre}</p>
+        <p style="color:#ffd700;font-size:13px">${m.rating || ""}</p>
+        <span class="status" style="background:${statusColor(m.status)}">${m.status || ""}</span>
+        <p style="font-size:12px">Budget: ${m.budget || "N/A"} | Box Office: ${m.boxOffice || "N/A"}</p>
+        <div class="stars">${starsHTML(m.id, Number(getVote(m.id)) || 0)}</div>
+        <p class="avgRating">Loading...</p>
+        <div class="buttons">
+          <a class="btn watch" href="#">Stream</a>
+          <a class="btn trailer" href="#">Trailer</a>
+          <a class="btn review" href="#">Review</a>
+        </div>
+      </div>`;
+    card.querySelector(".watch").onclick = (e) => {
+      e.preventDefault();
+      window.open("https://www.google.com/search?hl=en&q=" + encodeURIComponent(m.title + " where to watch"), "_blank");
+    };
+    card.querySelector(".trailer").onclick = (e) => {
+      e.preventDefault();
+      if (!m.trailerId){
+        window.open("https://www.youtube.com/results?search_query=" + encodeURIComponent(m.title + " official trailer"), "_blank");
+        return;
+      }
+      document.getElementById("tf").src = "https://www.youtube.com/embed/" + m.trailerId + "?autoplay=1";
+      document.getElementById("tl").href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(m.title + " trailer Hindi");
+      document.getElementById("tm").style.display = "flex";
+    };
+    card.querySelector(".review").onclick = (e) => {
+      e.preventDefault();
+      const t = m.title.includes("(" + m.year + ")") ? m.title : m.title + " (" + m.year + ")";
+      document.getElementById("rmTitle").textContent = t;
+      document.getElementById("rmText").textContent = m.review;
+      document.getElementById("rm").style.display = "flex";
+    };
+    card.querySelectorAll(".stars span").forEach(s => {
+      s.onclick = () => submitRating(m.id, parseInt(s.dataset.val), card);
+    });
+    list.appendChild(card);
+    loadRating(m.id, card);
+  });
+}
+
+function closeTrailer(){
+  document.getElementById("tm").style.display = "none";
+  document.getElementById("tf").src = "";
+}
+function closeReview(){
+  document.getElementById("rm").style.display = "none";
+}
+
+document.getElementById("search").addEventListener("input", function(){
+  const text = this.value.toLowerCase().trim();
+  document.querySelectorAll(".card").forEach((card, i) => {
+    card.style.display = movies[i].title.toLowerCase().includes(text) ? "" : "none";
+  });
+});
+
+render();
+</script>
+</body>
+</html>
