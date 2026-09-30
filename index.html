@@ -4,359 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CineWorld</title>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <style>
 *{box-sizing:border-box}
+body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,sans-serif}
+header{padding:25px 15px;background:#151515;text-align:center}
+.logo{font-size:34px;font-weight:bold;color:#e50914}
+header p{color:#aaa;margin:8px 0 0}
+.search{display:block;width:90%;max-width:600px;margin:25px auto;padding:15px;border:1px solid #333;border-radius:10px;background:#1b1b1b;color:#fff;font-size:16px;outline:none}
+h1{text-align:center;margin:30px 0 20px}
+.movies{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;padding:15px;max-width:1200px;margin:auto}
+.card{background:#171717;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px #000;display:flex;flex-direction:column}
+.poster{height:250px;background:#292929;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.poster img{width:100%;height:100%;object-fit:cover;display:block}
+.info{padding:14px;display:flex;flex-direction:column;flex:1}
+.info h2{font-size:18px;margin:0 0 8px}
+.info p{color:#aaa;margin:5px 0 12px}
+.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.btn{flex:1;min-width:70px;padding:10px;border:0;border-radius:7px;font-weight:bold;text-align:center;text-decoration:none;cursor:pointer;color:#fff;font-size:14px}
+.watch{background:#e50914}
+.trailer{background:#333}
+.review{background:#2a5d8f}
+.comments{background:#6a1b9a}
+.status{display:inline-block;margin:4px 0 8px;padding:5px 10px;border-radius:5px;font-size:12px;font-weight:bold;align-self:flex-start}
+.stars{margin:6px 0;font-size:22px;cursor:pointer;letter-spacing:2px}
+.stars span{color:#555}
+.stars span.active{color:#ffd700}
+.avgRating{font-size:12px;color:#aaa;margin:2px 0 8px}
 
-body{
-  margin:0;
-  background:#0b0b0b;
-  color:#fff;
-  font-family:Arial,sans-serif;
-}
+#tm,#rm,#cm{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:999;padding:12px}
+#tm{flex-direction:column}
+#tm iframe{width:100%;max-width:700px;aspect-ratio:16/9;border:0;border-radius:12px}
+#tm a{color:#fff;margin-top:16px}
+#tm button,#rm button{margin-top:14px;background:#e50914;color:#fff;border:0;padding:10px 24px;border-radius:8px;font-size:16px;cursor:pointer}
+#rm .box{background:#171717;max-width:500px;width:100%;padding:24px;border-radius:12px;max-height:80vh;overflow-y:auto}
+#rm h3{margin-top:0;color:#e50914}
 
-header{
-  padding:25px 15px;
-  background:#151515;
-  text-align:center;
-}
+#cm .box{background:#171717;max-width:500px;width:100%;border-radius:12px;padding:16px}
+#cmTitle{margin:0 0 10px;color:#e50914;font-size:18px}
+#cmMessages{height:280px;overflow-y:auto;background:#0f0f0f;padding:10px;border-radius:8px}
+#cm .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#cm input{padding:11px;border:1px solid #333;border-radius:7px;background:#222;color:#fff;outline:none}
+#cmName{width:120px}
+#cmText{flex:1;min-width:140px}
+#cm .send{padding:11px 18px;background:#e50914;color:#fff;border:0;border-radius:7px;font-weight:bold;cursor:pointer}
+#cm .send:disabled{opacity:.5}
+#cm .close{width:100%;margin-top:10px;padding:10px;background:#333;color:#fff;border:0;border-radius:7px;cursor:pointer}
 
-.logo{
-  font-size:34px;
-  font-weight:bold;
-  color:#e50914;
-}
-
-header p{
-  color:#aaa;
-  margin:8px 0 0;
-}
-
-.search{
-  display:block;
-  width:90%;
-  max-width:600px;
-  margin:25px auto;
-  padding:15px;
-  border:1px solid #333;
-  border-radius:10px;
-  background:#1b1b1b;
-  color:#fff;
-  font-size:16px;
-  outline:none;
-}
-
-h1{
-  text-align:center;
-  margin:30px 0 20px;
-}
-
-.movies{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:15px;
-  padding:15px;
-  max-width:1200px;
-  margin:auto;
-}
-
-.card{
-  background:#171717;
-  border-radius:12px;
-  overflow:hidden;
-  box-shadow:0 4px 15px #000;
-}
-
-.poster{
-  height:250px;
-  background:#292929;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-
-.poster img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-.info{
-  padding:14px;
-}
-
-.info h2{
-  font-size:18px;
-  margin:0 0 8px;
-}
-
-.info p{
-  color:#aaa;
-  margin:5px 0 12px;
-}
-
-.buttons{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-.btn{
-  flex:1;
-  min-width:70px;
-  padding:10px;
-  border:0;
-  border-radius:7px;
-  font-weight:bold;
-  text-align:center;
-  text-decoration:none;
-  cursor:pointer;
-  color:#fff;
-  font-size:14px;
-}
-
-.watch{
-  background:#e50914;
-}
-
-.trailer{
-  background:#333;
-}
-
-.review{
-  background:#2a5d8f;
-}
-
-.status{
-  display:inline-block;
-  margin:4px 0 8px;
-  padding:5px 10px;
-  border-radius:5px;
-  font-size:12px;
-  font-weight:bold;
-}
-
-.stars{
-  margin:6px 0;
-  font-size:22px;
-  cursor:pointer;
-  letter-spacing:2px;
-}
-
-.stars span{
-  color:#555;
-}
-
-.stars span.active{
-  color:#ffd700;
-}
-
-.avgRating{
-  font-size:12px;
-  color:#aaa;
-  margin:2px 0 8px;
-}
-
-/* TRAILER MODAL */
-
-#tm{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.92);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  z-index:999;
-  padding:12px;
-}
-
-#tm iframe{
-  width:100%;
-  max-width:700px;
-  aspect-ratio:16/9;
-  border:0;
-  border-radius:12px;
-}
-
-#tm a{
-  color:#fff;
-  margin-top:16px;
-}
-
-#tm button,
-#rm button{
-  margin-top:14px;
-  background:#e50914;
-  color:#fff;
-  border:0;
-  padding:10px 24px;
-  border-radius:8px;
-  font-size:16px;
-  cursor:pointer;
-}
-
-/* REVIEW MODAL */
-
-#rm{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.92);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-  padding:20px;
-}
-
-#rm .box{
-  background:#171717;
-  max-width:500px;
-  width:100%;
-  padding:24px;
-  border-radius:12px;
-  max-height:80vh;
-  overflow-y:auto;
-}
-
-#rm h3{
-  margin-top:0;
-  color:#e50914;
-}
-
-/* CHAT BOX */
-
-.chat-section{
-  max-width:700px;
-  margin:45px auto;
-  padding:15px;
-}
-
-.chat-title{
-  text-align:center;
-  margin-bottom:15px;
-}
-
-.chat-title h2{
-  margin:0 0 6px;
-  color:#e50914;
-}
-
-.chat-title p{
-  color:#888;
-  font-size:13px;
-}
-
-.chat-box{
-  background:#151515;
-  border:1px solid #292929;
-  border-radius:12px;
-  overflow:hidden;
-}
-
-.chat-messages{
-  height:320px;
-  overflow-y:auto;
-  padding:15px;
-  background:#0f0f0f;
-}
-
-.chat-message{
-  background:#1c1c1c;
-  border-radius:9px;
-  padding:10px 12px;
-  margin-bottom:10px;
-}
-
-.chat-name{
-  color:#e50914;
-  font-weight:bold;
-  font-size:13px;
-  margin-bottom:4px;
-}
-
-.chat-text{
-  color:#ddd;
-  font-size:14px;
-  line-height:1.4;
-  word-break:break-word;
-}
-
-.chat-time{
-  color:#666;
-  font-size:10px;
-  margin-top:5px;
-}
-
-.chat-form{
-  display:flex;
-  gap:8px;
-  padding:12px;
-  background:#171717;
-  flex-wrap:wrap;
-}
-
-.chat-name-input{
-  width:130px;
-  padding:11px;
-  border:1px solid #333;
-  border-radius:7px;
-  background:#222;
-  color:#fff;
-  outline:none;
-}
-
-.chat-input{
-  flex:1;
-  min-width:150px;
-  padding:11px;
-  border:1px solid #333;
-  border-radius:7px;
-  background:#222;
-  color:#fff;
-  outline:none;
-}
-
-.chat-send{
-  padding:11px 18px;
-  background:#e50914;
-  color:#fff;
-  border:0;
-  border-radius:7px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.chat-send:disabled{
-  opacity:.5;
-}
-
-.chat-note{
-  text-align:center;
-  color:#666;
-  font-size:11px;
-  padding:8px;
-}
-
-.no-chat{
-  color:#666;
-  text-align:center;
-  padding:40px 10px;
-}
-
-@media(min-width:700px){
-  .movies{
-    grid-template-columns:repeat(4,1fr);
-  }
-}
+.chat-section{max-width:700px;margin:45px auto;padding:15px}
+.chat-title{text-align:center;margin-bottom:15px}
+.chat-title h2{margin:0 0 6px;color:#e50914}
+.chat-title p{color:#888;font-size:13px}
+.chat-box{background:#151515;border:1px solid #292929;border-radius:12px;overflow:hidden}
+.chat-messages{height:320px;overflow-y:auto;padding:15px;background:#0f0f0f}
+.chat-message{background:#1c1c1c;border-radius:9px;padding:10px 12px;margin-bottom:10px}
+.chat-name{color:#e50914;font-weight:bold;font-size:13px;margin-bottom:4px}
+.chat-text{color:#ddd;font-size:14px;line-height:1.4;word-break:break-word}
+.chat-time{color:#666;font-size:10px;margin-top:5px}
+.chat-form{display:flex;gap:8px;padding:12px;background:#171717;flex-wrap:wrap}
+.chat-name-input{width:130px;padding:11px;border:1px solid #333;border-radius:7px;background:#222;color:#fff;outline:none}
+.chat-input{flex:1;min-width:150px;padding:11px;border:1px solid #333;border-radius:7px;background:#222;color:#fff;outline:none}
+.chat-send{padding:11px 18px;background:#e50914;color:#fff;border:0;border-radius:7px;font-weight:bold;cursor:pointer}
+.chat-send:disabled{opacity:.5}
+.chat-note{text-align:center;color:#666;font-size:11px;padding:8px}
+.no-chat{color:#666;text-align:center;padding:40px 10px}
+@media(min-width:700px){.movies{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -364,1909 +79,516 @@ h1{
   <p>Movies • Reviews • Trailers</p>
 </header>
 
-<input
-  class="search"
-  id="search"
-  type="text"
-  placeholder="Search movies..."
->
-
+<input class="search" id="search" type="text" placeholder="Search movies...">
 <h1>Latest Movies</h1>
-
 <div class="movies" id="movieList"></div>
 
-
-<!-- CHAT SECTION -->
-
 <section class="chat-section">
-
   <div class="chat-title">
     <h2>💬 CineWorld Chat</h2>
     <p>Apni movie opinion aur mashwara yahan share karein</p>
   </div>
-
   <div class="chat-box">
-
-    <div class="chat-messages" id="chatMessages">
-      <div class="no-chat">Messages load ho rahe hain...</div>
-    </div>
-
+    <div class="chat-messages" id="chatMessages"><div class="no-chat">Messages load ho rahe hain...</div></div>
     <form class="chat-form" id="chatForm">
-
-      <input
-        class="chat-name-input"
-        id="chatName"
-        type="text"
-        maxlength="30"
-        placeholder="Your name"
-        required
-      >
-
-      <input
-        class="chat-input"
-        id="chatInput"
-        type="text"
-        maxlength="300"
-        placeholder="Apna message likhein..."
-        required
-      >
-
-      <button class="chat-send" id="chatSend" type="submit">
-        Send
-      </button>
-
+      <input class="chat-name-input" id="chatName" type="text" maxlength="30" placeholder="Your name" required>
+      <input class="chat-input" id="chatInput" type="text" maxlength="300" placeholder="Apna message likhein..." required>
+      <button class="chat-send" id="chatSend" type="submit">Send</button>
     </form>
-
-    <div class="chat-note">
-      Please respectful language use karein.
-    </div>
-
+    <div class="chat-note">Please respectful language use karein.</div>
   </div>
-
 </section>
 
-
-<!-- TRAILER MODAL -->
-
 <div id="tm">
-
-  <iframe
-    id="tf"
-    allowfullscreen
-    allow="autoplay; encrypted-media">
-  </iframe>
-
-  <a
-    id="tl"
-    target="_blank"
-    rel="noopener">
-    Hindi trailer YouTube par dekhein
-  </a>
-
-  <button onclick="closeTrailer()">
-    Band karein
-  </button>
-
+  <iframe id="tf" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+  <a id="tl" target="_blank" rel="noopener">Hindi trailer YouTube par dekhein</a>
+  <button onclick="closeTrailer()">Band karein</button>
 </div>
-
-
-<!-- REVIEW MODAL -->
 
 <div id="rm">
-
   <div class="box">
-
     <h3 id="rmTitle"></h3>
-
     <p id="rmText"></p>
-
-    <button onclick="closeReview()">
-      Band karein
-    </button>
-
+    <button onclick="closeReview()">Band karein</button>
   </div>
-
 </div>
 
+<div id="cm">
+  <div class="box">
+    <h3 id="cmTitle"></h3>
+    <div id="cmMessages"></div>
+    <form id="cmForm" class="row">
+      <input id="cmName" maxlength="30" placeholder="Your name" required>
+      <input id="cmText" maxlength="300" placeholder="Is movie ke bare mein likhein..." required>
+      <button class="send" id="cmSend" type="submit">Send</button>
+    </form>
+    <button class="close" onclick="closeComments()">Band karein</button>
+  </div>
+</div>
 
 <script>
-
-/* =========================
-   FIREBASE
-========================= */
-
+/* ========== FIREBASE ========== */
 const firebaseConfig = {
-
   apiKey: "AIzaSyA4_Mwnnt0E_SMW4hh9ocZ1zGbVQVX1gZs",
-
   authDomain: "cineworld-a2b24.firebaseapp.com",
-
   projectId: "cineworld-a2b24",
-
   storageBucket: "cineworld-a2b24.firebasestorage.app",
-
   messagingSenderId: "243495095408",
-
   appId: "1:243495095408:web:9ba1eea4fd710f049878b5"
-
 };
-
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.firestore();
 
-
-/* =========================
-   MOVIES
-========================= */
-
+/* ========== MOVIES ========== */
 const movies = [
-{
-id:"deadpool-wolverine",
-title:"Deadpool & Wolverine",
-year:"2024",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
-trailerId:"73_1biulkYk",
-rating:"IMDb 7.6 • RT 78%",
-budget:"$200 million",
-boxOffice:"$1.34 billion",
-status:"Blockbuster Hit",
-review:"Ryan Reynolds aur Hugh Jackman pehli baar screen share karte hain, aur ye jodi expectations se zyada mazedaar nikalti hai."
-},
+{id:"deadpool-wolverine",title:"Deadpool & Wolverine",year:"2024",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",trailerId:"73_1biulkYk",rating:"IMDb 7.6 • RT 78%",budget:"$200 million",boxOffice:"$1.34 billion",status:"Blockbuster Hit",review:"Ryan Reynolds aur Hugh Jackman pehli baar screen share karte hain, aur ye jodi expectations se zyada mazedaar nikalti hai."},
+{id:"wonder-woman-1984",title:"Wonder Woman 1984",year:"2020",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",trailerId:"sfM7_JLk-84",rating:"IMDb 5.4 • RT 59%",budget:"$200 million",boxOffice:"$170 million",status:"Flop",review:"Gal Gadot ek baar phir Diana Prince ke roop mein wapas aati hain, is baar 1980s ki rangeen duniya mein."},
+{id:"super-mario-bros-movie",title:"The Super Mario Bros. Movie",year:"2023",genre:"Animation",poster:"https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",trailerId:"TnGl01FkMMo",rating:"IMDb 7.0 • RT 88%",budget:"$100 million",boxOffice:"$1.36 billion",status:"Blockbuster Hit",review:"Video game duniya bilkul sahi andaz mein screen par utaari gayi hai."},
+{id:"dune-part-two",title:"Dune: Part Two",year:"2024",genre:"Sci-Fi",poster:"https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",trailerId:"Way9Dexny3w",rating:"IMDb 8.5 • RT 92%",budget:"$190 million",boxOffice:"$714 million",status:"Hit",review:"Denis Villeneuve ne is sci-fi epic ko aur bhi bada aur behtareen bana diya hai."},
+{id:"spiderman-no-way-home",title:"Spider-Man: No Way Home",year:"2021",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",trailerId:"JfVOs4VSpmA",rating:"IMDb 8.2 • RT 93%",budget:"$200 million",boxOffice:"$1.9 billion",status:"Blockbuster Hit",review:"Multiverse khul gaya, purane villains wapas! MCU ki best Spider-Man movie."},
+{id:"avengers-endgame",title:"Avengers: Endgame",year:"2019",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg",trailerId:"TcMBFSGVi1c",rating:"IMDb 8.4 • RT 94%",budget:"$356 million",boxOffice:"$2.8 billion",status:"All-Time Blockbuster",review:"Marvel ki das saal ki kahani ka epic anjaam. Har character ko poora waqt milta hai."},
+{id:"avengers-doomsday",title:"Avengers: Doomsday",year:"2026",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg",trailerId:"5BOvC328DHY",rating:"Abhi release nahi hui",budget:"TBA",boxOffice:"Release ke baad update hoga",status:"Coming Soon",review:"18 December 2026 ko release hogi."},
+{id:"the-avengers-2012",title:"The Avengers (2012)",year:"2012",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",trailerId:"1hPpG4s3-O4",rating:"IMDb 8.0 • RT 91%",budget:"$220 million",boxOffice:"$1.5 billion",status:"Super Hit",review:"Pehli baar saare superheroes ek saath! Loki ki dhulai aur New York wali ladai."},
+{id:"avengers-age-of-ultron-2015",title:"Avengers: Age of Ultron (2015)",year:"2015",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/4ssDuvEDkSArWEdyBl2X5EHvYKU.jpg",trailerId:"tmeOjFno6Do",rating:"IMDb 7.3 • RT 76%",budget:"$365 million",boxOffice:"$1.4 billion",status:"Super Hit",review:"Ultron ne Avengers ko tod diya, par team ne phir se jod diya."},
+{id:"avengers-infinity-war-2018",title:"Avengers: Infinity War (2018)",year:"2018",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",trailerId:"6ZfuNTqbHE8",rating:"IMDb 8.4 • RT 85%",budget:"$325 million",boxOffice:"$2.0 billion",status:"Blockbuster Hit",review:"Thanos ne aate hi sabko hila diya. Avengers ki ab tak ki sab se emotional movie!"},
+{id:"captain-america-civil-war-2016",title:"Captain America: Civil War (2016)",year:"2016",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg",trailerId:"dKrVegVI0Us",rating:"IMDb 7.8 • RT 90%",budget:"$250 million",boxOffice:"$1.1 billion",status:"Super Hit",review:"Avengers vs Avengers! Cap aur Iron Man ki ladai."},
+{id:"iron-man-2008",title:"Iron Man (2008)",year:"2008",genre:"Action",poster:"https://raw.githubusercontent.com/Hamzaa408/cineworld/main/mf614hti1r9b1.jpg",trailerId:"ofkcLgzNZGM",rating:"IMDb 7.9 • RT 94%",budget:"$140 million",boxOffice:"$585 million",status:"Super Hit",review:"Jahan se Marvel shuru hua! Tony Stark ne gufa me suit banaya."},
+{id:"thor-2011",title:"Thor (2011)",year:"2011",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/prSfAi1xGrhLQNxVSUFh61xQ4Qy.jpg",trailerId:"JOddp-nlNvQ",rating:"IMDb 7.0 • RT 77%",budget:"$150 million",boxOffice:"$449 million",status:"Hit",review:"Bijli ka devta jab dharti pe aaya! Thor ka hammer aur Loki ki chalaki."},
+{id:"captain-america-2011",title:"Captain America: The First Avenger (2011)",year:"2011",genre:"Action",poster:"https://m.media-amazon.com/images/M/MV5BMTYzOTc2NzU3N15BMl5BanBnXkFtZTcwNjY3MDE3NQ@@._V1_FMjpg_UX1000_.jpg",trailerId:"JerVrbLldXw",rating:"IMDb 6.9 • RT 80%",budget:"$140 million",boxOffice:"$370 million",status:"Hit",review:"Steve Rogers ki kahani! Dubla patla ladka kaise Captain America bana."},
+{id:"iron-man-3-2013",title:"Iron Man 3 (2013)",year:"2013",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/qhPtAc1TKbMPqNvcdXSOn9Bn7hZ.jpg",trailerId:"BoohRoVA9WQ",rating:"IMDb 7.1 • RT 79%",budget:"$200 million",boxOffice:"$1.2 Billion",status:"Blockbuster",review:"Tony ka ghar toot gaya, suit bhi gaya! Ab asli Iron Man kaise ladega?"},
+{id:"thor-dark-world-2013",title:"Thor: The Dark World (2013)",year:"2013",genre:"Action",poster:"https://m.media-amazon.com/images/M/MV5BMTQyNzAwOTUxOF5BMl5BanBnXkFtZTcwMTE0OTc5OQ@@._V1_FMjpg_UX1000_.jpg",trailerId:"pXW3pCfbP-4",rating:"IMDb 6.8 • RT 66%",budget:"$170 million",boxOffice:"$644 million",status:"Super Hit",review:"Thor vs Dark Elves! Jane Foster ko ajeeb taqat lagi."},
+{id:"captain-winter-soldier-2014",title:"Captain America: The Winter Soldier (2014)",year:"2014",genre:"Action",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Captain_America_The_Winter_Soldier_poster.jpg",trailerId:"NLWsK1ZibxI",rating:"IMDb 7.7 • RT 90%",budget:"$170 million",boxOffice:"$714 million",status:"Blockbuster",review:"SHIELD me gaddar! Captain ka purana dost Bucky ab dushman ban gaya."},
+{id:"iron-man-2-2010",title:"Iron Man 2 (2010)",year:"2010",genre:"Action",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Iron_Man_2_poster.jpg",trailerId:"BoohRoVA9WQ",rating:"IMDb 7.0 • RT 72%",budget:"$200 million",boxOffice:"$623 million",status:"Super Hit",review:"Tony ne bola 'I am Iron Man' to sab peeche pad gaye! War Machine ki entry!"},
+{id:"thor-ragnarok-2017",title:"Thor: Ragnarok (2017)",year:"2017",genre:"Action, Comedy",poster:"https://m.media-amazon.com/images/M/MV5BMjMyNDkzMzI1OF5BMl5BanBnXkFtZTgwODcxODg5MjI@._V1_FMjpg_UX1000_.jpg",trailerId:"v7MGUNV8MxU",rating:"IMDb 7.9 • RT 93%",budget:"$180 million",boxOffice:"$853 million",status:"Blockbuster",review:"Thor ka hammer toot gaya! Ab Hulk se ladai hogi? Full comedy + action ka dhamaka!"},
+{id:"thor-love-thunder-2022",title:"Thor: Love and Thunder (2022)",year:"2022",genre:"Action, Comedy",poster:"https://image.tmdb.org/t/p/w500/pIkRyD18kl4FhoCNQuWxWu5cBLM.jpg",trailerId:"Go8nTmfrQd8",rating:"IMDb 6.2 • RT 63%",budget:"$250 million",boxOffice:"$760 million",status:"Super Hit",review:"Thor ko pyaar ho gaya! Jane Foster bani Mighty Thor."},
+{id:"guardians-galaxy-2014",title:"Guardians of the Galaxy (2014)",year:"2014",genre:"Action, Comedy",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Guardians_of_the_Galaxy_%28film%29_poster.jpg",trailerId:"d96cjJhvlMA",rating:"IMDb 8.0 • RT 92%",budget:"$232 million",boxOffice:"$773 million",status:"Blockbuster",review:"Chor logon ki team! Star-Lord, Groot, Rocket sab ne milke galaxy bachayi!"},
+{id:"guardians-galaxy-vol2-2017",title:"Guardians of the Galaxy Vol. 2 (2017)",year:"2017",genre:"Action, Comedy",poster:"https://image.tmdb.org/t/p/w500/y4MBh0EjBlMuOzv9axM4qJlmhzz.jpg",trailerId:"pr7R5HDwUzM",rating:"IMDb 7.6 • RT 85%",budget:"$200 million",boxOffice:"$863 million",status:"Blockbuster",review:"Star-Lord ka baap nikla poora planet! Baby Groot ne to dil jeet liya."},
+{id:"guardians-galaxy-vol3-2023",title:"Guardians of the Galaxy Vol. 3 (2023)",year:"2023",genre:"Action, Comedy",poster:"https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg",trailerId:"u3V5KDHRQvk",rating:"IMDb 8.0 • RT 82%",budget:"$250 million",boxOffice:"$845 million",status:"Blockbuster",review:"Rocket ki kahani! Sabse emotional Guardians movie."},
+{id:"ant-man-2015",title:"Ant-Man (2015)",year:"2015",genre:"Action, Comedy",poster:"https://m.media-amazon.com/images/M/MV5BMjM2NTQ5Mzc2M15BMl5BanBnXkFtZTgwNTcxMDI2NTE@._V1_FMjpg_UX1000_.jpg",trailerId:"pWdKf3MneyI",rating:"IMDb 7.3 • RT 83%",budget:"$130 million",boxOffice:"$519 million",status:"Super Hit",review:"Chor bana superhero! Scott Lang chota ho jata hai."},
+{id:"doctor-strange-2016",title:"Doctor Strange (2016)",year:"2016",genre:"Action, Fantasy",poster:"https://m.media-amazon.com/images/M/MV5BNjgwNzAzNjk1Nl5BMl5BanBnXkFtZTgwMzQ2NjI1OTE@._V1_FMjpg_UX1000_.jpg",trailerId:"HSzx-zryEgM",rating:"IMDb 7.5 • RT 89%",budget:"$165 million",boxOffice:"$677 million",status:"Super Hit",review:"Doctor se jadugar ban gaya! Time ko ghumata hai, dimension ka khela!"},
+{id:"doctor-strange-multiverse-2022",title:"Doctor Strange in the Multiverse of Madness (2022)",year:"2022",genre:"Action, Horror",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Doctor_Strange_in_the_Multiverse_of_Madness_poster.jpg",trailerId:"aWzlQ2N4qqg",rating:"IMDb 6.9 • RT 74%",budget:"$200 million",boxOffice:"$952 million",status:"Blockbuster",review:"Multiverse khul gaya! Wanda pagal ho gayi, sab universe tabah!"},
+{id:"black-panther-2018",title:"Black Panther (2018)",year:"2018",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/uxzzxijgPIY7slzFvMotPv8wjKA.jpg",trailerId:"xjDjIWPwcV5",rating:"IMDb 7.3 • RT 96%",budget:"$200 million",boxOffice:"$1.3 Billion",status:"Blockbuster",review:"Wakanda ka raja! T'Challa ko apne bhai Killmonger se ladna hai!"},
+{id:"black-panther-wakanda-forever-2022",title:"Black Panther: Wakanda Forever (2022)",year:"2022",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/sv1xJUazXeYqALzczSZ3O6nkH75.jpg",trailerId:"_Z3QKkl1WyM",rating:"IMDb 6.7 • RT 84%",budget:"$250 million",boxOffice:"$859 million",status:"Blockbuster",review:"T'Challa ke baad Wakanda kaise bachega? Shuri bani nayi Black Panther!"},
+{id:"spider-man-homecoming-2017",title:"Spider-Man: Homecoming (2017)",year:"2017",genre:"Action, Comedy",poster:"https://image.tmdb.org/t/p/w500/c24sv2weTHPsmDa7jEMN0m2P3RT.jpg",trailerId:"n9DwoQ7HWvM",rating:"IMDb 7.4 • RT 92%",budget:"$175 million",boxOffice:"$880 million",status:"Blockbuster",review:"Chota Spider-Man! Tony Stark ne suit diya, Vulture se ladai!"},
+{id:"spider-man-far-from-home-2019",title:"Spider-Man: Far From Home (2019)",year:"2019",genre:"Action, Comedy",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Spider-Man_Far_From_Home_poster.jpg",trailerId:"DYYtuKyMt_Y",rating:"IMDb 7.4 • RT 90%",budget:"$160 million",boxOffice:"$1.1 Billion",status:"Blockbuster",review:"Europe trip gaya ulta! Mysterio ne sabko ullu banaya."},
+{id:"spider-man-brand-new-day-2026",title:"Spider-Man: Brand New Day (2026)",year:"2026",genre:"Action",poster:"https://image.tmdb.org/t/p/w500/9JCQtDCSpPR2ld55yNlEg1VwcQo.jpg",trailerId:"JfVOs4VSpmA",rating:"IMDb 8.2 • RT 90%",budget:"$200 million",boxOffice:"$2.48B",status:"Most Awaited",review:"No Way Home ke baad sab bhool gaye Peter ko! Ab naya start."},
+{id:"avatar-2009",title:"Avatar (2009)",year:"2009",genre:"Sci-Fi",poster:"https://image.tmdb.org/t/p/w500/6EiRUJpuoeQPghrs3YNktfnqOVh.jpg",trailerId:"5PSNL1qE6VY",rating:"IMDb 7.9 • RT 81%",budget:"$237 million",boxOffice:"$2.92 billion",status:"All-Time Blockbuster",review:"James Cameron ki duniya Pandora! Full visual jadoo hai."},
+{id:"avatar-way-of-water-2022",title:"Avatar: The Way of Water (2022)",year:"2022",genre:"Sci-Fi",poster:"https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",trailerId:"d9MyW72ELq0",rating:"IMDb 7.6 • RT 76%",budget:"$350 million",boxOffice:"$2.32 billion",status:"Blockbuster Hit",review:"13 saal baad Pandora wapas! Samundar wala Na'vi qabeele."},
+{id:"avatar-fire-and-ash-2025",title:"Avatar: Fire and Ash (2025)",year:"2025",genre:"Sci-Fi",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Avatar_Fire_and_Ash_poster.jpeg",trailerId:"Ma1x7ikpid8",rating:"IMDb 7.8 • RT 78%",budget:"$400 million",boxOffice:"$1.2 billion",status:"Blockbuster Hit",review:"19 Dec 2025 ko release hui! Aag wale Ash People Na'vi."},
+{id:"incredible-hulk-2008",title:"The Incredible Hulk (2008)",year:"2008",genre:"Action, Sci-Fi",poster:"https://raw.githubusercontent.com/Hamzaa408/cineworld/main/The_Incredible_Hulk_%28film%29_poster.jpg",trailerId:"xbqNb2PFB08",rating:"IMDb 6.5 • RT 67%",budget:"$150 million",boxOffice:"$265 million",status:"Hit",review:"Bruce Banner jab gussa hota hai to Hulk ban jata hai! Army se ladai aur Abomination se takkar, full action!"},
+{id:"ant-man-wasp-2018",title:"Ant-Man and the Wasp (2018)",year:"2018",genre:"Action, Comedy",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Ant-Man_and_the_Wasp_poster.jpg",trailerId:"8_rTIAOohas",rating:"IMDb 7.0 • RT 87%",budget:"$162 million",boxOffice:"$622 million",status:"Blockbuster",review:"Scott Lang aur Hope Van Dyne ek nayi mission par nikalte hain. Action aur comedy dono ka zabardast combination."},
+{id:"captain-marvel-2019",title:"Captain Marvel (2019)",year:"2019",genre:"Action, Sci-Fi",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Captain_Marvel_(film)_poster.jpg",trailerId:"Z1BCujX3pw8",rating:"IMDb 6.8 • RT 79%",budget:"$152 million",boxOffice:"$1.13 billion",status:"Blockbuster",review:"Carol Danvers ka origin aur uska Captain Marvel banne ka safar."},
+{id:"black-widow-2021",title:"Black Widow (2021)",year:"2021",genre:"Action, Thriller",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Black_Widow_(2021_film)_poster.jpg",trailerId:"ybji16u608U",rating:"IMDb 6.7 • RT 79%",budget:"$200 million",boxOffice:"$379 million",status:"Super Hit",review:"Natasha Romanoff ki past story aur uske family connection ki kahani."},
+{id:"shang-chi-2021",title:"Shang-Chi and the Legend of the Ten Rings (2021)",year:"2021",genre:"Action, Fantasy",poster:"https://image.tmdb.org/t/p/w500/1BIoJGKbXjdFDAqUEiA2VHqkK1Z.jpg",trailerId:"8YjFbMbfXaQ",rating:"IMDb 7.4 • RT 92%",budget:"$150 million",boxOffice:"$432 million",status:"Blockbuster",review:"Shang-Chi ko apne past ka saamna karna padta hai. Ten Rings ki power ke saath zabardast martial arts action."},
+{id:"eternals-2021",title:"Eternals (2021)",year:"2021",genre:"Action, Sci-Fi",poster:"https://image.tmdb.org/t/p/w500/6AdXwFTRTAzggD2QUTt5B7JFGKL.jpg",trailerId:"x_me3xsvDgk",rating:"IMDb 6.3 • RT 47%",budget:"$200 million",boxOffice:"$402 million",status:"Super Hit",review:"Hazaron saal se chhupe powerful heroes duniya ko ek naye threat se bachane ke liye saamne aate hain."},
+{id:"ant-man-quantumania-2023",title:"Ant-Man and the Wasp: Quantumania (2023)",year:"2023",genre:"Action, Comedy",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Ant-Man_and_the_Wasp_Quantumania_poster.jpg",trailerId:"ZlNFpri-Y40",rating:"IMDb 6.0 • RT 46%",budget:"$200 million",boxOffice:"$476 million",status:"Super Hit",review:"Ant-Man family Quantum Realm mein phans jaati hai jahan Kang ka saamna hota hai."},
+{id:"the-marvels-2023",title:"The Marvels (2023)",year:"2023",genre:"Action, Sci-Fi",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/The_Marvels_poster.jpg",trailerId:"wS_qbDztgVY",rating:"IMDb 5.5 • RT 62%",budget:"$270 million",boxOffice:"$206 million",status:"Average",review:"Captain Marvel, Ms. Marvel aur Monica Rambeau ek saath aa jaati hain."},
+{id:"captain-america-brave-new-world-2025",title:"Captain America: Brave New World (2025)",year:"2025",genre:"Action, Thriller",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Captain_America_Brave_New_World_poster%20(1).jpg",trailerId:"1pHDWnXmK7Y",rating:"IMDb 7.1 • RT 85%",budget:"$250 million",boxOffice:"$415 million",status:"Blockbuster",review:"Sam Wilson naye Captain America ke roop mein ek international conspiracy ka saamna karta hai."},
+{id:"thunderbolts-2025",title:"Thunderbolts* (2025)",year:"2025",genre:"Action, Comedy",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Thunderbolts__poster.jpg",trailerId:"v-94Snw-H4o",rating:"IMDb 7.5 • RT 88%",budget:"$200 million",boxOffice:"$380 million",status:"Most Awaited",review:"Anti-heroes ki ek unusual team ek dangerous mission par nikalti hai."},
+{id:"deadpool-2016",title:"Deadpool (2016)",year:"2016",genre:"Action",poster:"https://raw.githubusercontent.com/Hamzaa408/cineworld/main/Deadpool_(2016_poster).png",trailerId:"XithL4a1baw",rating:"IMDb 8.0 • RT 85%",budget:"$58 million",boxOffice:"$782 million",status:"Super Hit",review:"Wade Wilson ki mast entry! Comedy aur action ka full dose!"},
+{id:"deadpool-2-2018",title:"Deadpool 2 (2018)",year:"2018",genre:"Action",poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Deadpool_2_poster.jpg",trailerId:"D86RtevtfrA",rating:"IMDb 7.6 • RT 84%",budget:"$110 million",boxOffice:"$785 million",status:"Super Hit",review:"Deadpool double dhamaka! Zyada funny, zyada action!"},
 
-{
-id:"wonder-woman-1984",
-title:"Wonder Woman 1984",
-year:"2020",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
-trailerId:"sfM7_JLk-84",
-rating:"IMDb 5.4 • RT 59%",
-budget:"$200 million",
-boxOffice:"$170 million",
-status:"Flop",
-review:"Gal Gadot ek baar phir Diana Prince ke roop mein wapas aati hain, is baar 1980s ki rangeen duniya mein."
-},
-
-{
-id:"super-mario-bros-movie",
-title:"The Super Mario Bros. Movie",
-year:"2023",
-genre:"Animation",
-poster:"https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",
-trailerId:"TnGl01FkMMo",
-rating:"IMDb 7.0 • RT 88%",
-budget:"$100 million",
-boxOffice:"$1.36 billion",
-status:"Blockbuster Hit",
-review:"Video game duniya bilkul sahi andaz mein screen par utaari gayi hai."
-},
-
-{
-id:"dune-part-two",
-title:"Dune: Part Two",
-year:"2024",
-genre:"Sci-Fi",
-poster:"https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
-trailerId:"Way9Dexny3w",
-rating:"IMDb 8.5 • RT 92%",
-budget:"$190 million",
-boxOffice:"$714 million",
-status:"Hit",
-review:"Denis Villeneuve ne is sci-fi epic ko aur bhi bada aur behtareen bana diya hai."
-},
-
-{
-id:"spiderman-no-way-home",
-title:"Spider-Man: No Way Home",
-year:"2021",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
-trailerId:"JfVOs4VSpmA",
-rating:"IMDb 8.2 • RT 93%",
-budget:"$200 million",
-boxOffice:"$1.9 billion",
-status:"Blockbuster Hit",
-review:"Multiverse khul gaya, purane villains wapas! MCU ki best Spider-Man movie."
-},
-
-{
-id:"avengers-endgame",
-title:"Avengers: Endgame",
-year:"2019",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg",
-trailerId:"TcMBFSGVi1c",
-rating:"IMDb 8.4 • RT 94%",
-budget:"$356 million",
-boxOffice:"$2.8 billion",
-status:"All-Time Blockbuster",
-review:"Marvel ki das saal ki kahani ka epic anjaam. Har character ko poora waqt milta hai."
-},
-
-{
-id:"avengers-doomsday",
-title:"Avengers: Doomsday",
-year:"2026",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg",
-trailerId:"5BOvC328DHY",
-rating:"Abhi release nahi hui",
-budget:"TBA",
-boxOffice:"Release ke baad update hoga",
-status:"Coming Soon",
-review:"18 December 2026 ko release hogi."
-},
-
-{
-id:"the-avengers-2012",
-title:"The Avengers (2012)",
-year:"2012",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
-trailerId:"1hPpG4s3-O4",
-rating:"IMDb 8.0 • RT 91%",
-budget:"$220 million",
-boxOffice:"$1.5 billion",
-status:"Super Hit",
-review:"Pehli baar saare superheroes ek saath! Loki ki dhulai aur New York wali ladai."
-},
-
-{
-id:"avengers-age-of-ultron-2015",
-title:"Avengers: Age of Ultron (2015)",
-year:"2015",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/4ssDuvEDkSArWEdyBl2X5EHvYKU.jpg",
-trailerId:"tmeOjFno6Do",
-rating:"IMDb 7.3 • RT 76%",
-budget:"$365 million",
-boxOffice:"$1.4 billion",
-status:"Super Hit",
-review:"Ultron ne Avengers ko tod diya, par team ne phir se jod diya."
-},
-
-{
-id:"avengers-infinity-war-2018",
-title:"Avengers: Infinity War (2018)",
-year:"2018",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
-trailerId:"6ZfuNTqbHE8",
-rating:"IMDb 8.4 • RT 85%",
-budget:"$325 million",
-boxOffice:"$2.0 billion",
-status:"Blockbuster Hit",
-review:"Thanos ne aate hi sabko hila diya. Avengers ki ab tak ki sab se emotional movie!"
-},
-
-{
-id:"captain-america-civil-war-2016",
-title:"Captain America: Civil War (2016)",
-year:"2016",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg",
-trailerId:"dKrVegVI0Us",
-rating:"IMDb 7.8 • RT 90%",
-budget:"$250 million",
-boxOffice:"$1.1 billion",
-status:"Super Hit",
-review:"Avengers vs Avengers! Cap aur Iron Man ki ladai."
-},
-
-{
-id:"iron-man-2008",
-title:"Iron Man (2008)",
-year:"2008",
-genre:"Action",
-poster:"https://raw.githubusercontent.com/Hamzaa408/cineworld/main/mf614hti1r9b1.jpg",
-trailerId:"ofkcLgzNZGM",
-rating:"IMDb 7.9 • RT 94%",
-budget:"$140 million",
-boxOffice:"$585 million",
-status:"Super Hit",
-review:"Jahan se Marvel shuru hua! Tony Stark ne gufa me suit banaya."
-},
-
-{
-id:"thor-2011",
-title:"Thor (2011)",
-year:"2011",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/prSfAi1xGrhLQNxVSUFh61xQ4Qy.jpg",
-trailerId:"JOddp-nlNvQ",
-rating:"IMDb 7.0 • RT 77%",
-budget:"$150 million",
-boxOffice:"$449 million",
-status:"Hit",
-review:"Bijli ka devta jab dharti pe aaya! Thor ka hammer aur Loki ki chalaki."
-},
-
-{
-id:"captain-america-2011",
-title:"Captain America: The First Avenger (2011)",
-year:"2011",
-genre:"Action",
-poster:"https://m.media-amazon.com/images/M/MV5BMTYzOTc2NzU3N15BMl5BanBnXkFtZTcwNjY3MDE3NQ@@._V1_FMjpg_UX1000_.jpg",
-trailerId:"JerVrbLldXw",
-rating:"IMDb 6.9 • RT 80%",
-budget:"$140 million",
-boxOffice:"$370 million",
-status:"Hit",
-review:"Steve Rogers ki kahani! Dubla patla ladka kaise Captain America bana."
-},
-
-{
-id:"iron-man-3-2013",
-title:"Iron Man 3 (2013)",
-year:"2013",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/qhPtAc1TKbMPqNvcdXSOn9Bn7hZ.jpg",
-trailerId:"BoohRoVA9WQ",
-rating:"IMDb 7.1 • RT 79%",
-budget:"$200 million",
-boxOffice:"$1.2 Billion",
-status:"Blockbuster",
-review:"Tony ka ghar toot gaya, suit bhi gaya! Ab asli Iron Man kaise ladega?"
-},
-
-{
-id:"thor-dark-world-2013",
-title:"Thor: The Dark World (2013)",
-year:"2013",
-genre:"Action",
-poster:"https://m.media-amazon.com/images/M/MV5BMTQyNzAwOTUxOF5BMl5BanBnXkFtZTcwMTE0OTc5OQ@@._V1_FMjpg_UX1000_.jpg",
-trailerId:"pXW3pCfbP-4",
-rating:"IMDb 6.8 • RT 66%",
-budget:"$170 million",
-boxOffice:"$644 million",
-status:"Super Hit",
-review:"Thor vs Dark Elves! Jane Foster ko ajeeb taqat lagi."
-},
-
-{
-id:"captain-winter-soldier-2014",
-title:"Captain America: The Winter Soldier (2014)",
-year:"2014",
-genre:"Action",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Captain_America_The_Winter_Soldier_poster.jpg",
-trailerId:"NLWsK1ZibxI",
-rating:"IMDb 7.7 • RT 90%",
-budget:"$170 million",
-boxOffice:"$714 million",
-status:"Blockbuster",
-review:"SHIELD me gaddar! Captain ka purana dost Bucky ab dushman ban gaya."
-},
-
-{
-id:"iron-man-2-2010",
-title:"Iron Man 2 (2010)",
-year:"2010",
-genre:"Action",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Iron_Man_2_poster.jpg",
-trailerId:"BoohRoVA9WQ",
-rating:"IMDb 7.0 • RT 72%",
-budget:"$200 million",
-boxOffice:"$623 million",
-status:"Super Hit",
-review:"Tony ne bola 'I am Iron Man' to sab peeche pad gaye! War Machine ki entry!"
-},
-
-{
-id:"thor-ragnarok-2017",
-title:"Thor: Ragnarok (2017)",
-year:"2017",
-genre:"Action, Comedy",
-poster:"https://m.media-amazon.com/images/M/MV5BMjMyNDkzMzI1OF5BMl5BanBnXkFtZTgwODcxODg5MjI@._V1_FMjpg_UX1000_.jpg",
-trailerId:"v7MGUNV8MxU",
-rating:"IMDb 7.9 • RT 93%",
-budget:"$180 million",
-boxOffice:"$853 million",
-status:"Blockbuster",
-review:"Thor ka hammer toot gaya! Ab Hulk se ladai hogi? Full comedy + action ka dhamaka!"
-},
-
-{
-id:"thor-love-thunder-2022",
-title:"Thor: Love and Thunder (2022)",
-year:"2022",
-genre:"Action, Comedy",
-poster:"https://image.tmdb.org/t/p/w500/pIkRyD18kl4FhoCNQuWxWu5cBLM.jpg",
-trailerId:"Go8nTmfrQd8",
-rating:"IMDb 6.2 • RT 63%",
-budget:"$250 million",
-boxOffice:"$760 million",
-status:"Super Hit",
-review:"Thor ko pyaar ho gaya! Jane Foster bani Mighty Thor."
-},
-
-{
-id:"guardians-galaxy-2014",
-title:"Guardians of the Galaxy (2014)",
-year:"2014",
-genre:"Action, Comedy",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Guardians_of_the_Galaxy_%28film%29_poster.jpg",
-trailerId:"d96cjJhvlMA",
-rating:"IMDb 8.0 • RT 92%",
-budget:"$232 million",
-boxOffice:"$773 million",
-status:"Blockbuster",
-review:"Chor logon ki team! Star-Lord, Groot, Rocket sab ne milke galaxy bachayi!"
-},
-
-{
-id:"guardians-galaxy-vol2-2017",
-title:"Guardians of the Galaxy Vol. 2 (2017)",
-year:"2017",
-genre:"Action, Comedy",
-poster:"https://image.tmdb.org/t/p/w500/y4MBh0EjBlMuOzv9axM4qJlmhzz.jpg",
-trailerId:"pr7R5HDwUzM",
-rating:"IMDb 7.6 • RT 85%",
-budget:"$200 million",
-boxOffice:"$863 million",
-status:"Blockbuster",
-review:"Star-Lord ka baap nikla poora planet! Baby Groot ne to dil jeet liya."
-},
-
-{
-id:"guardians-galaxy-vol3-2023",
-title:"Guardians of the Galaxy Vol. 3 (2023)",
-year:"2023",
-genre:"Action, Comedy",
-poster:"https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg",
-trailerId:"u3V5KDHRQvk",
-rating:"IMDb 8.0 • RT 82%",
-budget:"$250 million",
-boxOffice:"$845 million",
-status:"Blockbuster",
-review:"Rocket ki kahani! Sabse emotional Guardians movie."
-},
-
-{
-id:"ant-man-2015",
-title:"Ant-Man (2015)",
-year:"2015",
-genre:"Action, Comedy",
-poster:"https://m.media-amazon.com/images/M/MV5BMjM2NTQ5Mzc2M15BMl5BanBnXkFtZTgwNTcxMDI2NTE@._V1_FMjpg_UX1000_.jpg",
-trailerId:"pWdKf3MneyI",
-rating:"IMDb 7.3 • RT 83%",
-budget:"$130 million",
-boxOffice:"$519 million",
-status:"Super Hit",
-review:"Chor bana superhero! Scott Lang chota ho jata hai."
-},
-
-{
-id:"doctor-strange-2016",
-title:"Doctor Strange (2016)",
-year:"2016",
-genre:"Action, Fantasy",
-poster:"https://m.media-amazon.com/images/M/MV5BNjgwNzAzNjk1Nl5BMl5BanBnXkFtZTgwMzQ2NjI1OTE@._V1_FMjpg_UX1000_.jpg",
-trailerId:"HSzx-zryEgM",
-rating:"IMDb 7.5 • RT 89%",
-budget:"$165 million",
-boxOffice:"$677 million",
-status:"Super Hit",
-review:"Doctor se jadugar ban gaya! Time ko ghumata hai, dimension ka khela!"
-},
-
-{
-id:"doctor-strange-multiverse-2022",
-title:"Doctor Strange in the Multiverse of Madness (2022)",
-year:"2022",
-genre:"Action, Horror",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Doctor_Strange_in_the_Multiverse_of_Madness_poster.jpg",
-trailerId:"aWzlQ2N4qqg",
-rating:"IMDb 6.9 • RT 74%",
-budget:"$200 million",
-boxOffice:"$952 million",
-status:"Blockbuster",
-review:"Multiverse khul gaya! Wanda pagal ho gayi, sab universe tabah!"
-},
-
-{
-id:"black-panther-2018",
-title:"Black Panther (2018)",
-year:"2018",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/uxzzxijgPIY7slzFvMotPv8wjKA.jpg",
-trailerId:"xjDjIWPwcV5",
-rating:"IMDb 7.3 • RT 96%",
-budget:"$200 million",
-boxOffice:"$1.3 Billion",
-status:"Blockbuster",
-review:"Wakanda ka raja! T'Challa ko apne bhai Killmonger se ladna hai!"
-},
-
-{
-id:"black-panther-wakanda-forever-2022",
-title:"Black Panther: Wakanda Forever (2022)",
-year:"2022",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/sv1xJUazXeYqALzczSZ3O6nkH75.jpg",
-trailerId:"_Z3QKkl1WyM",
-rating:"IMDb 6.7 • RT 84%",
-budget:"$250 million",
-boxOffice:"$859 million",
-status:"Blockbuster",
-review:"T'Challa ke baad Wakanda kaise bachega? Shuri bani nayi Black Panther!"
-},
-
-{
-id:"spider-man-homecoming-2017",
-title:"Spider-Man: Homecoming (2017)",
-year:"2017",
-genre:"Action, Comedy",
-poster:"https://image.tmdb.org/t/p/w500/c24sv2weTHPsmDa7jEMN0m2P3RT.jpg",
-trailerId:"n9DwoQ7HWvM",
-rating:"IMDb 7.4 • RT 92%",
-budget:"$175 million",
-boxOffice:"$880 million",
-status:"Blockbuster",
-review:"Chota Spider-Man! Tony Stark ne suit diya, Vulture se ladai!"
-},
-
-{
-id:"spider-man-far-from-home-2019",
-title:"Spider-Man: Far From Home (2019)",
-year:"2019",
-genre:"Action, Comedy",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Spider-Man_Far_From_Home_poster.jpg",
-trailerId:"DYYtuKyMt_Y",
-rating:"IMDb 7.4 • RT 90%",
-budget:"$160 million",
-boxOffice:"$1.1 Billion",
-status:"Blockbuster",
-review:"Europe trip gaya ulta! Mysterio ne sabko ullu banaya."
-},
-
-{
-id:"spider-man-brand-new-day-2026",
-title:"Spider-Man: Brand New Day (2026)",
-year:"2026",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/9JCQtDCSpPR2ld55yNlEg1VwcQo.jpg",
-trailerId:"JfVOs4VSpmA",
-rating:"IMDb 8.2 • RT 90%",
-budget:"$200 million",
-boxOffice:"$2.48B",
-status:"Most Awaited",
-review:"No Way Home ke baad sab bhool gaye Peter ko! Ab naya start."
-},
-
-{
-id:"avatar-2009",
-title:"Avatar (2009)",
-year:"2009",
-genre:"Sci-Fi",
-poster:"https://image.tmdb.org/t/p/w500/6EiRUJpuoeQPghrs3YNktfnqOVh.jpg",
-trailerId:"5PSNL1qE6VY",
-rating:"IMDb 7.9 • RT 81%",
-budget:"$237 million",
-boxOffice:"$2.92 billion",
-status:"All-Time Blockbuster",
-review:"James Cameron ki duniya Pandora! Full visual jadoo hai."
-},
-
-{
-id:"avatar-way-of-water-2022",
-title:"Avatar: The Way of Water (2022)",
-year:"2022",
-genre:"Sci-Fi",
-poster:"https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
-trailerId:"d9MyW72ELq0",
-rating:"IMDb 7.6 • RT 76%",
-budget:"$350 million",
-boxOffice:"$2.32 billion",
-status:"Blockbuster Hit",
-review:"13 saal baad Pandora wapas! Samundar wala Na'vi qabeele."
-},
-
-{
-id:"avatar-fire-and-ash-2025",
-title:"Avatar: Fire and Ash (2025)",
-year:"2025",
-genre:"Sci-Fi",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Avatar_Fire_and_Ash_poster.jpeg",
-trailerId:"Ma1x7ikpid8",
-rating:"IMDb 7.8 • RT 78%",
-budget:"$400 million",
-boxOffice:"$1.2 billion",
-status:"Blockbuster Hit",
-review:"19 Dec 2025 ko release hui! Aag wale Ash People Na'vi."
-},
-
-{
-id:"incredible-hulk-2008",
-title:"The Incredible Hulk (2008)",
-year:"2008",
-genre:"Action, Sci-Fi",
-poster:"https://raw.githubusercontent.com/Hamzaa408/cineworld/main/The_Incredible_Hulk_%28film%29_poster.jpg",
-trailerId:"xbqNb2PFB08",
-rating:"IMDb 6.5 • RT 67%",
-budget:"$150 million",
-boxOffice:"$265 million",
-status:"Hit",
-review:"Bruce Banner jab gussa hota hai to Hulk ban jata hai! Army se ladai aur Abomination se takkar, full action!"
-},
-
-{
-id:"ant-man-wasp-2018",
-title:"Ant-Man and the Wasp (2018)",
-year:"2018",
-genre:"Action, Comedy",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Ant-Man_and_the_Wasp_poster.jpg",
-trailerId:"8_rTIAOohas",
-rating:"IMDb 7.0 • RT 87%",
-budget:"$162 million",
-boxOffice:"$622 million",
-status:"Blockbuster",
-review:"Scott Lang aur Hope Van Dyne ek nayi mission par nikalte hain. Action aur comedy dono ka zabardast combination."
-},
-
-{
-id:"captain-marvel-2019",
-title:"Captain Marvel (2019)",
-year:"2019",
-genre:"Action, Sci-Fi",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Captain_Marvel_(film)_poster.jpg",
-trailerId:"Z1BCujX3pw8",
-rating:"IMDb 6.8 • RT 79%",
-budget:"$152 million",
-boxOffice:"$1.13 billion",
-status:"Blockbuster",
-review:"Carol Danvers ka origin aur uska Captain Marvel banne ka safar."
-},
-
-{
-id:"black-widow-2021",
-title:"Black Widow (2021)",
-year:"2021",
-genre:"Action, Thriller",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Black_Widow_(2021_film)_poster.jpg",
-trailerId:"ybji16u608U",
-rating:"IMDb 6.7 • RT 79%",
-budget:"$200 million",
-boxOffice:"$379 million",
-status:"Super Hit",
-review:"Natasha Romanoff ki past story aur uske family connection ki kahani."
-},
-
-{
-id:"shang-chi-2021",
-title:"Shang-Chi and the Legend of the Ten Rings (2021)",
-year:"2021",
-genre:"Action, Fantasy",
-poster:"https://image.tmdb.org/t/p/w500/1BIoJGKbXjdFDAqUEiA2VHqkK1Z.jpg",
-trailerId:"8YjFbMbfXaQ",
-rating:"IMDb 7.4 • RT 92%",
-budget:"$150 million",
-boxOffice:"$432 million",
-status:"Blockbuster",
-review:"Shang-Chi ko apne past ka saamna karna padta hai. Ten Rings ki power ke saath zabardast martial arts action."
-},
-
-{
-id:"eternals-2021",
-title:"Eternals (2021)",
-year:"2021",
-genre:"Action, Sci-Fi",
-poster:"https://image.tmdb.org/t/p/w500/6AdXwFTRTAzggD2QUTt5B7JFGKL.jpg",
-trailerId:"x_me3xsvDgk",
-rating:"IMDb 6.3 • RT 47%",
-budget:"$200 million",
-boxOffice:"$402 million",
-status:"Super Hit",
-review:"Hazaron saal se chhupe powerful heroes duniya ko ek naye threat se bachane ke liye saamne aate hain."
-},
-
-{
-id:"ant-man-quantumania-2023",
-title:"Ant-Man and the Wasp: Quantumania (2023)",
-year:"2023",
-genre:"Action, Comedy",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Ant-Man_and_the_Wasp_Quantumania_poster.jpg",
-trailerId:"ZlNFpri-Y40",
-rating:"IMDb 6.0 • RT 46%",
-budget:"$200 million",
-boxOffice:"$476 million",
-status:"Super Hit",
-review:"Ant-Man family Quantum Realm mein phans jaati hai jahan Kang ka saamna hota hai."
-},
-
-{
-id:"the-marvels-2023",
-title:"The Marvels (2023)",
-year:"2023",
-genre:"Action, Sci-Fi",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/The_Marvels_poster.jpg",
-trailerId:"wS_qbDztgVY",
-rating:"IMDb 5.5 • RT 62%",
-budget:"$270 million",
-boxOffice:"$206 million",
-status:"Average",
-review:"Captain Marvel, Ms. Marvel aur Monica Rambeau ek saath aa jaati hain."
-},
-
-{
-id:"captain-america-brave-new-world-2025",
-title:"Captain America: Brave New World (2025)",
-year:"2025",
-genre:"Action, Thriller",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Captain_America_Brave_New_World_poster%20(1).jpg",
-trailerId:"1pHDWnXmK7Y",
-rating:"IMDb 7.1 • RT 85%",
-budget:"$250 million",
-boxOffice:"$415 million",
-status:"Blockbuster",
-review:"Sam Wilson naye Captain America ke roop mein ek international conspiracy ka saamna karta hai."
-},
-
-{
-id:"thunderbolts-2025",
-title:"Thunderbolts* (2025)",
-year:"2025",
-genre:"Action, Comedy",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Thunderbolts__poster.jpg",
-trailerId:"v-94Snw-H4o",
-rating:"IMDb 7.5 • RT 88%",
-budget:"$200 million",
-boxOffice:"$380 million",
-status:"Most Awaited",
-review:"Anti-heroes ki ek unusual team ek dangerous mission par nikalti hai."
-},
-
-{
-id:"deadpool-2016",
-title:"Deadpool (2016)",
-year:"2016",
-genre:"Action",
-poster:"https://raw.githubusercontent.com/Hamzaa408/cineworld/main/Deadpool_(2016_poster).png",
-trailerId:"XithL4a1baw",
-rating:"IMDb 8.0 • RT 85%",
-budget:"$58 million",
-boxOffice:"$782 million",
-status:"Super Hit",
-review:"Wade Wilson ki mast entry! Comedy aur action ka full dose!"
-},
-
-{
-id:"deadpool-2-2018",
-title:"Deadpool 2 (2018)",
-year:"2018",
-genre:"Action",
-poster:"https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Deadpool_2_poster.jpg",
-trailerId:"D86RtevtfrA",
-rating:"IMDb 7.6 • RT 84%",
-budget:"$110 million",
-boxOffice:"$785 million",
-status:"Super Hit",
-review:"Deadpool double dhamaka! Zyada funny, zyada action!"
-},
-
-{
-id:"fast-furious-2001",
-title:"The Fast and the Furious (2001)",
-year:"2001",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/gaHYbFDCEIePzOOLZzzeMZ3dhOL.jpg",
-trailerId:"",
-rating:"IMDb 6.8 • RT 54%",
-budget:"$38 million",
-boxOffice:"$207 million",
-status:"Hit",
-review:"Street racing ki duniya mein pehli baar entry! Dom aur Brian ki dosti yahin se shuru hoti hai."
-},
-
-{
-id:"2-fast-2-furious-2003",
-title:"2 Fast 2 Furious (2003)",
-year:"2003",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/S5xtHNtejr8ojnobmEqDaBVaYU.jpg",
-trailerId:"",
-rating:"IMDb 5.9 • RT 36%",
-budget:"$76 million",
-boxOffice:"$236 million",
-status:"Hit",
-review:"Brian Miami mein naye partner ke saath, races aur ek dangerous mission."
-},
-
-{
-id:"tokyo-drift-2006",
-title:"The Fast and the Furious: Tokyo Drift (2006)",
-year:"2006",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/09PjyxUCe1SGYAgeh2AJQMOO3sB.jpg",
-trailerId:"",
-rating:"IMDb 6.0 • RT 39%",
-budget:"$85 million",
-boxOffice:"$158 million",
-status:"Average",
-review:"Tokyo ki drift racing scene mein naya kirdar, lekin series ka sabse kam kamane wala part."
-},
-
-{
-id:"fast-furious-2009",
-title:"Fast & Furious (2009)",
-year:"2009",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/8XaCa3ck1YKlUFsq6QGa4a1DCsy.jpg",
-trailerId:"",
-rating:"IMDb 6.6 • RT 28%",
-budget:"$85 million",
-boxOffice:"$363 million",
-status:"Super Hit",
-review:"Dom aur Brian dobara ek team mein! Yahin se series ka asli comeback shuru hota hai."
-},
-
-{
-id:"fast-five-2011",
-title:"Fast Five (2011)",
-year:"2011",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/8YzGWx5IlxDGO4mCE9dnHqe9QRk.jpg",
-trailerId:"",
-rating:"IMDb 7.3 • RT 78%",
-budget:"$125 million",
-boxOffice:"$626 million",
-status:"Blockbuster",
-review:"Heist genre mein switch! The Rock ki entry ne series ko naya level de diya."
-},
-
-{
-id:"fast-furious-6-2013",
-title:"Fast & Furious 6 (2013)",
-year:"2013",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/e9m5xUnbFn9pAJOKtHUV5cBqjcT.jpg",
-trailerId:"",
-rating:"IMDb 7.0 • RT 70%",
-budget:"$160 million",
-boxOffice:"$789 million",
-status:"Blockbuster",
-review:"Letty wapas aa gayi! Tank aur airplane wali action ne dhoom macha di."
-},
-
-{
-id:"furious-7-2015",
-title:"Furious 7 (2015)",
-year:"2015",
-genre:"Action",
-poster:"",
-trailerId:"",
-rating:"IMDb 7.1 • RT 81%",
-budget:"$190 million",
-boxOffice:"$1.5 billion",
-status:"Blockbuster Hit",
-review:"Paul Walker ko emotional farewell. Series ki pehli movie jo $1 billion cross ki."
-},
-
-{
-id:"fate-of-the-furious-2017",
-title:"The Fate of the Furious (2017)",
-year:"2017",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/dImWM7DPzc0uV4TIQXCBmzcTvJT.jpg",
-trailerId:"",
-rating:"IMDb 6.6 • RT 66%",
-budget:"$250 million",
-boxOffice:"$1.24 billion",
-status:"Blockbuster",
-review:"Dom apni family ke khilaf ho jata hai! Cipher ne poori team ko hila diya."
-},
-
-{
-id:"hobbs-shaw-2019",
-title:"Fast & Furious Presents: Hobbs & Shaw (2019)",
-year:"2019",
-genre:"Action, Comedy",
-poster:"https://image.tmdb.org/t/p/w500/qLmisboLiVDXVj4gzWEnfyCQ8bY.jpg",
-trailerId:"",
-rating:"IMDb 6.5 • RT 67%",
-budget:"$200 million",
-boxOffice:"$760 million",
-status:"Super Hit",
-review:"Spin-off jahan dushman Hobbs aur Shaw ek team ban jate hain, full comedy aur action."
-},
-
-{
-id:"f9-2021",
-title:"F9: The Fast Saga (2021)",
-year:"2021",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/bOFaAXmWWXC3Rbv4u4uM9ZSzRXP.jpg",
-trailerId:"",
-rating:"IMDb 5.2 • RT 58%",
-budget:"$200 million",
-boxOffice:"$726 million",
-status:"Super Hit",
-review:"Dom ka bhula hua bhai wapas aata hai! Series ab space tak pahunch jati hai."
-},
-
-{
-id:"fast-x-2023",
-title:"Fast X (2023)",
-year:"2023",
-genre:"Action",
-poster:"https://image.tmdb.org/t/p/w500/1E5baAaEse26fej7uHcjOgEE2t2.jpg",
-trailerId:"",
-rating:"IMDb 5.8 • RT 56%",
-budget:"$340 million",
-boxOffice:"$714 million",
-status:"Average",
-review:"Dante, Hernan Reyes ka beta, family se badla lene aata hai. Series ka sabse mehnga part."
-}
+/* FAST & FURIOUS: poster Wikipedia se aayega */
+{id:"fast-furious-2001",title:"The Fast and the Furious (2001)",year:"2001",genre:"Action",poster:"",wiki:"The_Fast_and_the_Furious_(2001_film)",trailerId:"",rating:"IMDb 6.8 • RT 54%",budget:"$38 million",boxOffice:"$207 million",status:"Hit",review:"Street racing ki duniya mein pehli baar entry! Dom aur Brian ki dosti yahin se shuru hoti hai."},
+{id:"2-fast-2-furious-2003",title:"2 Fast 2 Furious (2003)",year:"2003",genre:"Action",poster:"",wiki:"2_Fast_2_Furious",trailerId:"",rating:"IMDb 5.9 • RT 36%",budget:"$76 million",boxOffice:"$236 million",status:"Hit",review:"Brian Miami mein naye partner ke saath, races aur ek dangerous mission."},
+{id:"tokyo-drift-2006",title:"The Fast and the Furious: Tokyo Drift (2006)",year:"2006",genre:"Action",poster:"",wiki:"The_Fast_and_the_Furious:_Tokyo_Drift",trailerId:"",rating:"IMDb 6.0 • RT 39%",budget:"$85 million",boxOffice:"$158 million",status:"Average",review:"Tokyo ki drift racing scene mein naya kirdar, lekin series ka sabse kam kamane wala part."},
+{id:"fast-furious-2009",title:"Fast & Furious (2009)",year:"2009",genre:"Action",poster:"",wiki:"Fast_&_Furious_(2009_film)",trailerId:"",rating:"IMDb 6.6 • RT 28%",budget:"$85 million",boxOffice:"$363 million",status:"Super Hit",review:"Dom aur Brian dobara ek team mein! Yahin se series ka asli comeback shuru hota hai."},
+{id:"fast-five-2011",title:"Fast Five (2011)",year:"2011",genre:"Action",poster:"",wiki:"Fast_Five",trailerId:"",rating:"IMDb 7.3 • RT 78%",budget:"$125 million",boxOffice:"$626 million",status:"Blockbuster",review:"Heist genre mein switch! The Rock ki entry ne series ko naya level de diya."},
+{id:"fast-furious-6-2013",title:"Fast & Furious 6 (2013)",year:"2013",genre:"Action",poster:"",wiki:"Fast_&_Furious_6",trailerId:"",rating:"IMDb 7.0 • RT 70%",budget:"$160 million",boxOffice:"$789 million",status:"Blockbuster",review:"Letty wapas aa gayi! Tank aur airplane wali action ne dhoom macha di."},
+{id:"furious-7-2015",title:"Furious 7 (2015)",year:"2015",genre:"Action",poster:"",wiki:"Furious_7",trailerId:"",rating:"IMDb 7.1 • RT 81%",budget:"$190 million",boxOffice:"$1.5 billion",status:"Blockbuster Hit",review:"Paul Walker ko emotional farewell. Series ki pehli movie jo $1 billion cross ki."},
+{id:"fate-of-the-furious-2017",title:"The Fate of the Furious (2017)",year:"2017",genre:"Action",poster:"",wiki:"The_Fate_of_the_Furious",trailerId:"",rating:"IMDb 6.6 • RT 66%",budget:"$250 million",boxOffice:"$1.24 billion",status:"Blockbuster",review:"Dom apni family ke khilaf ho jata hai! Cipher ne poori team ko hila diya."},
+{id:"hobbs-shaw-2019",title:"Fast & Furious Presents: Hobbs & Shaw (2019)",year:"2019",genre:"Action, Comedy",poster:"",wiki:"Fast_&_Furious_Presents:_Hobbs_&_Shaw",trailerId:"",rating:"IMDb 6.5 • RT 67%",budget:"$200 million",boxOffice:"$760 million",status:"Super Hit",review:"Spin-off jahan dushman Hobbs aur Shaw ek team ban jate hain, full comedy aur action."},
+{id:"f9-2021",title:"F9: The Fast Saga (2021)",year:"2021",genre:"Action",poster:"",wiki:"F9_(film)",trailerId:"",rating:"IMDb 5.2 • RT 58%",budget:"$200 million",boxOffice:"$726 million",status:"Super Hit",review:"Dom ka bhula hua bhai wapas aata hai! Series ab space tak pahunch jati hai."},
+{id:"fast-x-2023",title:"Fast X (2023)",year:"2023",genre:"Action",poster:"",wiki:"Fast_X",trailerId:"",rating:"IMDb 5.8 • RT 56%",budget:"$340 million",boxOffice:"$714 million",status:"Average",review:"Dante, Hernan Reyes ka beta, family se badla lene aata hai. Series ka sabse mehnga part."}
 ];
 
-
-/* =========================
-   MOVIE FUNCTIONS
-========================= */
-
+/* ========== HELPERS ========== */
 const list=document.getElementById("movieList");
 
-
 function statusColor(s){
-
   if(s==="Flop") return "#e50914";
-
-  if(
-    s==="Coming Soon" ||
-    s==="Most Awaited"
-  ) return "#555";
-
+  if(s==="Coming Soon"||s==="Most Awaited") return "#555";
   if(s==="Average") return "#b8860b";
-
   return "#2e7d32";
 }
 
-
-function starsHTML(movieId,current){
-
+function starsHTML(id,current){
   let h="";
-
   for(let i=1;i<=5;i++){
-
-    h+=`
-      <span
-        data-id="${movieId}"
-        data-val="${i}"
-        class="${i<=current?"active":""}">
-        ★
-      </span>
-    `;
-
+    h+=`<span data-id="${id}" data-val="${i}" class="${i<=current?"active":""}">★</span>`;
   }
-
   return h;
 }
 
+function getVote(id){try{return localStorage.getItem("voted_"+id)}catch(e){return null}}
+function saveVote(id,val){try{localStorage.setItem("voted_"+id,val)}catch(e){}}
 
-function getVote(id){
+function escapeHTML(text){
+  const d=document.createElement("div");
+  d.textContent=text;
+  return d.innerHTML;
+}
 
-  try{
-    return localStorage.getItem("voted_"+id);
+function formatChatTime(ts){
+  if(!ts) return "";
+  try{return ts.toDate().toLocaleString()}catch(e){return ""}
+}
+
+/* ========== POSTER SYSTEM ========== */
+function placeholderPoster(title){
+  return "https://placehold.co/500x750/292929/ffffff?text="+encodeURIComponent(title);
+}
+
+function getPosterSources(m){
+  const s=[];
+  if(m.poster) s.push(m.poster);
+
+  if(m.poster && m.poster.includes("image.tmdb.org/t/p/w500/")){
+    const p=m.poster.split("/w500/")[1];
+    s.push("https://image.tmdb.org/t/p/w780/"+p);
+    s.push("https://image.tmdb.org/t/p/original/"+p);
   }
-  catch(e){
+
+  const RAW="raw.githubusercontent.com/Hamzaa408/cineworld/main/";
+  const CDN="cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/";
+
+  if(m.poster && m.poster.includes(RAW)){
+    s.push("https://"+CDN+m.poster.split(RAW)[1]);
+  }
+  if(m.poster && m.poster.includes(CDN)){
+    s.push("https://"+RAW+m.poster.split(CDN)[1]);
+  }
+  return [...new Set(s)];
+}
+
+async function getWikiPoster(wiki){
+  try{
+    const r=await fetch(
+      "https://en.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(wiki)
+    );
+    if(!r.ok) return null;
+    const d=await r.json();
+    return (d.thumbnail&&d.thumbnail.source)
+      || (d.originalimage&&d.originalimage.source)
+      || null;
+  }catch(e){
     return null;
   }
-
 }
 
-
-function saveVote(id,val){
-
-  try{
-    localStorage.setItem("voted_"+id,val);
-  }
-  catch(e){}
-
-}
-
-
-/* =========================
-   POSTER SYSTEM
-========================= */
-
-function placeholderPoster(title){
-
-  return "https://placehold.co/500x750/292929/ffffff?text="+
-    encodeURIComponent(title);
-}
-
-
-function getPosterSources(movie){
-
-  const sources=[];
-
-  if(movie.poster){
-    sources.push(movie.poster);
-  }
-
-  /*
-    TMDB ka alternate size
-  */
-
-  if(
-    movie.poster &&
-    movie.poster.includes("image.tmdb.org/t/p/w500/")
-  ){
-
-    const path=movie.poster.split("/w500/")[1];
-
-    sources.push(
-      "https://image.tmdb.org/t/p/w780/"+path
-    );
-
-    sources.push(
-      "https://image.tmdb.org/t/p/original/"+path
-    );
-  }
-
-
-  /*
-    GitHub RAW -> jsDelivr
-  */
-
-  if(
-    movie.poster &&
-    movie.poster.includes(
-      "raw.githubusercontent.com/Hamzaa408/cineworld/main/"
-    )
-  ){
-
-    const file=
-      movie.poster.split(
-        "raw.githubusercontent.com/Hamzaa408/cineworld/main/"
-      )[1];
-
-    sources.push(
-      "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/"+file
-    );
-  }
-
-
-  /*
-    jsDelivr -> GitHub RAW
-  */
-
-  if(
-    movie.poster &&
-    movie.poster.includes(
-      "cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/"
-    )
-  ){
-
-    const file=
-      movie.poster.split(
-        "cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/"
-      )[1];
-
-    sources.push(
-      "https://raw.githubusercontent.com/Hamzaa408/cineworld/main/"+file
-    );
-  }
-
-
-  sources.push(
-    placeholderPoster(movie.title)
-  );
-
-  return [...new Set(sources)];
-}
-
-
-function loadPoster(img,movie){
-
-  const sources=getPosterSources(movie);
-
+function loadPoster(img,m){
+  const sources=getPosterSources(m);
   let index=0;
+  let wikiTried=false;
 
-  function tryNext(){
-
-    if(index>=sources.length){
-      img.src=placeholderPoster(movie.title);
+  async function tryNext(){
+    if(index<sources.length){
+      img.onerror=tryNext;
+      img.src=sources[index++];
       return;
     }
-
-    const source=sources[index++];
-
-    img.onerror=tryNext;
-
-    img.src=source;
+    if(m.wiki && !wikiTried){
+      wikiTried=true;
+      const url=await getWikiPoster(m.wiki);
+      if(url){
+        img.onerror=tryNext;
+        img.src=url;
+        return;
+      }
+    }
+    img.onerror=null;
+    img.src=placeholderPoster(m.title);
   }
 
   tryNext();
 }
 
-
-/* =========================
-   RATINGS
-========================= */
-
+/* ========== RATINGS ========== */
 async function loadRating(movieId,container){
-
+  const el=container.querySelector(".avgRating");
   try{
-
-    const doc=
-      await db.collection("ratings")
-      .doc(movieId)
-      .get();
-
+    const doc=await db.collection("ratings").doc(movieId).get();
     if(doc.exists){
-
       const d=doc.data();
-
-      const avg=
-        d.count
-        ? (d.total/d.count).toFixed(1)
-        : "0.0";
-
-      container.querySelector(".avgRating")
-      .textContent=
-        `${avg} ⭐ - ${d.count} votes`;
-
+      const avg=d.count?(d.total/d.count).toFixed(1):"0.0";
+      el.textContent=`${avg} ⭐ - ${d.count} votes`;
+    }else{
+      el.textContent="Abhi koi rating nahi";
     }
-    else{
-
-      container.querySelector(".avgRating")
-      .textContent=
-        "Abhi koi rating nahi";
-
-    }
-
+  }catch(e){
+    el.textContent="Rating unavailable";
   }
-  catch(e){
-
-    container.querySelector(".avgRating")
-    .textContent=
-      "Rating unavailable";
-
-  }
-
 }
-
 
 async function submitRating(movieId,val,container){
-
   if(getVote(movieId)){
-
-    alert(
-      "Aap is movie ko pehle hi rate kar chuke hain. Shukriya!"
-    );
-
+    alert("Aap is movie ko pehle hi rate kar chuke hain. Shukriya!");
     return;
   }
-
-
-  const ref=
-    db.collection("ratings")
-    .doc(movieId);
-
-
+  const ref=db.collection("ratings").doc(movieId);
   try{
-
-    await db.runTransaction(
-      async(t)=>{
-
-        const doc=
-          await t.get(ref);
-
-        if(doc.exists){
-
-          const d=doc.data();
-
-          t.update(ref,{
-
-            total:
-              (Number(d.total)||0)+val,
-
-            count:
-              (Number(d.count)||0)+1
-
-          });
-
-        }
-        else{
-
-          t.set(ref,{
-
-            total:val,
-
-            count:1
-
-          });
-
-        }
-
+    await db.runTransaction(async(t)=>{
+      const doc=await t.get(ref);
+      if(doc.exists){
+        const d=doc.data();
+        t.update(ref,{
+          total:(Number(d.total)||0)+val,
+          count:(Number(d.count)||0)+1
+        });
+      }else{
+        t.set(ref,{total:val,count:1});
       }
-    );
-
-
+    });
     saveVote(movieId,val);
-
     await loadRating(movieId,container);
-
-
-    container
-      .querySelectorAll(".stars span")
-      .forEach(s=>{
-
-        s.classList.toggle(
-          "active",
-          parseInt(s.dataset.val)<=val
-        );
-
-      });
-
-  }
-  catch(e){
-
+    container.querySelectorAll(".stars span").forEach(s=>{
+      s.classList.toggle("active",parseInt(s.dataset.val)<=val);
+    });
+  }catch(e){
     console.error(e);
-
-    alert(
-      "Rating save nahi hui, dobara try karein."
-    );
-
+    alert("Rating save nahi hui, dobara try karein.");
   }
-
 }
 
-
-/* =========================
-   RENDER MOVIES
-========================= */
-
+/* ========== RENDER MOVIES ========== */
 function render(){
-
   list.innerHTML="";
 
-
   movies.forEach((m)=>{
-
-    const card=
-      document.createElement("div");
-
+    const card=document.createElement("div");
     card.className="card";
 
-
     card.innerHTML=`
-
       <div class="poster">
-
-        <img
-          src="${placeholderPoster(m.title)}"
-          alt="${m.title}"
-          loading="lazy"
-          referrerpolicy="no-referrer"
-        >
-
+        <img src="${placeholderPoster(m.title)}" alt="${escapeHTML(m.title)}" loading="lazy" referrerpolicy="no-referrer">
       </div>
-
-
       <div class="info">
-
         <h2>${m.title}</h2>
-
-        <p>
-          ${m.year} • ${m.genre}
-        </p>
-
-
-        <p
-          style="
-            color:#ffd700;
-            font-size:13px
-          "
-        >
-          ${m.rating || ""}
-        </p>
-
-
-        <span
-          class="status"
-          style="
-            background:${statusColor(m.status)}
-          "
-        >
-          ${m.status || ""}
-        </span>
-
-
-        <p style="font-size:12px">
-
-          Budget:
-          ${m.budget || "N/A"}
-
-          |
-
-          Box Office:
-          ${m.boxOffice || "N/A"}
-
-        </p>
-
-
-        <div class="stars">
-          ${starsHTML(m.id,0)}
-        </div>
-
-
-        <p class="avgRating">
-          Loading...
-        </p>
-
-
+        <p>${m.year} • ${m.genre}</p>
+        <p style="color:#ffd700;font-size:13px">${m.rating||""}</p>
+        <span class="status" style="background:${statusColor(m.status)}">${m.status||""}</span>
+        <p style="font-size:12px">Budget: ${m.budget||"N/A"} | Box Office: ${m.boxOffice||"N/A"}</p>
+        <div class="stars">${starsHTML(m.id,0)}</div>
+        <p class="avgRating">Loading...</p>
         <div class="buttons">
-
-          <a
-            class="btn watch"
-            href="#"
-          >
-            Stream
-          </a>
-
-
-          <a
-            class="btn trailer"
-            href="#"
-          >
-            Trailer
-          </a>
-
-
-          <a
-            class="btn review"
-            href="#"
-          >
-            Review
-          </a>
-
+          <a class="btn watch" href="#">Stream</a>
+          <a class="btn trailer" href="#">Trailer</a>
+          <a class="btn review" href="#">Review</a>
+          <a class="btn comments" href="#">Comments</a>
         </div>
+      </div>`;
 
-      </div>
-    `;
+    loadPoster(card.querySelector(".poster img"),m);
 
-
-    /* POSTER LOAD */
-
-    const posterImg=
-      card.querySelector(".poster img");
-
-    loadPoster(posterImg,m);
-
-
-    /* SAVED RATING */
-
-    const savedVote=
-      getVote(m.id);
-
-
+    const savedVote=getVote(m.id);
     if(savedVote){
-
-      card
-        .querySelectorAll(".stars span")
-        .forEach(s=>{
-
-          s.classList.toggle(
-
-            "active",
-
-            parseInt(s.dataset.val)
-            <=
-            parseInt(savedVote)
-
-          );
-
-        });
-
+      card.querySelectorAll(".stars span").forEach(s=>{
+        s.classList.toggle("active",parseInt(s.dataset.val)<=parseInt(savedVote));
+      });
     }
 
+    card.querySelector(".watch").onclick=(e)=>{
+      e.preventDefault();
+      window.open("https://www.google.com/search?hl=en&q="+encodeURIComponent(m.title+" where to watch"),"_blank");
+    };
 
-    /* STREAM */
+    card.querySelector(".trailer").onclick=(e)=>{
+      e.preventDefault();
+      const ytSearch="https://www.youtube.com/results?search_query="+encodeURIComponent(m.title+" trailer Hindi");
+      if(!m.trailerId){
+        window.open(ytSearch,"_blank");
+        return;
+      }
+      document.getElementById("tf").src="https://www.youtube.com/embed/"+m.trailerId+"?autoplay=1";
+      document.getElementById("tl").href=ytSearch;
+      document.getElementById("tm").style.display="flex";
+    };
 
-    card
-      .querySelector(".watch")
-      .onclick=(e)=>{
+    card.querySelector(".review").onclick=(e)=>{
+      e.preventDefault();
+      document.getElementById("rmTitle").textContent=m.title+" ("+m.year+")";
+      document.getElementById("rmText").textContent=m.review||"Review abhi available nahi.";
+      document.getElementById("rm").style.display="flex";
+    };
 
-        e.preventDefault();
+    card.querySelector(".comments").onclick=(e)=>{
+      e.preventDefault();
+      openComments(m);
+    };
 
-        window.open(
-
-          "https://www.google.com/search?hl=en&q="+
-
-          encodeURIComponent(
-            m.title+" where to watch"
-          ),
-
-          "_blank"
-
-        );
-
-      };
-
-
-    /* TRAILER */
-
-    card
-      .querySelector(".trailer")
-      .onclick=(e)=>{
-
-        e.preventDefault();
-
-
-        if(!m.trailerId){
-
-          window.open(
-
-            "https://www.youtube.com/results?search_query="+
-
-            encodeURIComponent(
-              m.title+" trailer Hindi"
-            ),
-
-            "_blank"
-
-          );
-
-          return;
-        }
-
-
-        document.getElementById("tf").src=
-
-          "https://www.youtube.com/embed/"+
-          m.trailerId+
-          "?autoplay=1";
-
-
-        document.getElementById("tl").href=
-
-          "https://www.youtube.com/results?search_query="+
-
-          encodeURIComponent(
-            m.title+" trailer Hindi"
-          );
-
-
-        document.getElementById("tm")
-          .style.display="flex";
-
-      };
-
-
-    /* REVIEW */
-
-    card
-      .querySelector(".review")
-      .onclick=(e)=>{
-
-        e.preventDefault();
-
-
-        document.getElementById("rmTitle")
-          .textContent=
-          m.title+" ("+m.year+")";
-
-
-        document.getElementById("rmText")
-          .textContent=
-          m.review ||
-          "Review abhi available nahi.";
-
-
-        document.getElementById("rm")
-          .style.display="flex";
-
-      };
-
-
-    /* STARS */
-
-    card
-      .querySelectorAll(".stars span")
-      .forEach(s=>{
-
-        s.onclick=()=>{
-
-          submitRating(
-
-            m.id,
-
-            parseInt(
-              s.dataset.val
-            ),
-
-            card
-
-          );
-
-        };
-
-      });
-
+    card.querySelectorAll(".stars span").forEach(s=>{
+      s.onclick=()=>submitRating(m.id,parseInt(s.dataset.val),card);
+    });
 
     list.appendChild(card);
-
-
     loadRating(m.id,card);
-
   });
-
 }
 
-
-/* =========================
-   TRAILER CLOSE
-========================= */
-
+/* ========== MODAL CLOSE ========== */
 function closeTrailer(){
-
-  document.getElementById("tm")
-    .style.display="none";
-
-  document.getElementById("tf")
-    .src="";
-
+  document.getElementById("tm").style.display="none";
+  document.getElementById("tf").src="";
 }
-
-
 function closeReview(){
-
-  document.getElementById("rm")
-    .style.display="none";
-
+  document.getElementById("rm").style.display="none";
 }
 
+/* ========== SEARCH ========== */
+document.getElementById("search").addEventListener("input",function(){
+  const text=this.value.toLowerCase().trim();
+  document.querySelectorAll(".card").forEach((card,i)=>{
+    const m=movies[i];
+    const match=
+      m.title.toLowerCase().includes(text)||
+      m.genre.toLowerCase().includes(text)||
+      m.year.toString().includes(text);
+    card.style.display=match?"":"none";
+  });
+});
 
-/* =========================
-   SEARCH
-========================= */
+/* ========== PER-MOVIE COMMENTS ========== */
+let cmUnsub=null,cmMovieId=null;
 
-document
-  .getElementById("search")
-  .addEventListener(
-    "input",
-    function(){
-
-      const text=
-        this.value
-        .toLowerCase()
-        .trim();
-
-
-      document
-        .querySelectorAll(".card")
-        .forEach((card,i)=>{
-
-          const movie=movies[i];
-
-
-          const match=
-
-            movie.title
-              .toLowerCase()
-              .includes(text)
-
-            ||
-
-            movie.genre
-              .toLowerCase()
-              .includes(text)
-
-            ||
-
-            movie.year
-              .toString()
-              .includes(text);
-
-
-          card.style.display=
-            match
-            ? ""
-            : "none";
-
-        });
-
-    }
-  );
-
-
-/* =========================
-   CHAT SYSTEM
-========================= */
-
-const chatMessages=
-  document.getElementById("chatMessages");
-
-const chatForm=
-  document.getElementById("chatForm");
-
-const chatName=
-  document.getElementById("chatName");
-
-const chatInput=
-  document.getElementById("chatInput");
-
-const chatSend=
-  document.getElementById("chatSend");
-
-
-/*
-  Naam browser mein save rahega
-*/
-
-try{
-
-  const savedName=
-    localStorage.getItem("cineworld_chat_name");
-
-  if(savedName){
-    chatName.value=savedName;
-  }
-
-}
-catch(e){}
-
-
-/* Escape HTML */
-
-function escapeHTML(text){
-
-  const div=
-    document.createElement("div");
-
-  div.textContent=text;
-
-  return div.innerHTML;
-
-}
-
-
-/* Time */
-
-function formatChatTime(timestamp){
-
-  if(!timestamp){
-    return "";
-  }
+function openComments(m){
+  cmMovieId=m.id;
+  document.getElementById("cmTitle").textContent="💬 "+m.title;
+  const box=document.getElementById("cmMessages");
+  box.innerHTML='<div class="no-chat">Loading...</div>';
+  document.getElementById("cm").style.display="flex";
 
   try{
+    document.getElementById("cmName").value=localStorage.getItem("cineworld_chat_name")||"";
+  }catch(e){}
 
-    const date=
-      timestamp.toDate();
+  if(cmUnsub) cmUnsub();
 
-    return date.toLocaleString();
-
-  }
-  catch(e){
-
-    return "";
-
-  }
-
+  cmUnsub=db.collection("movieChats").doc(m.id).collection("messages")
+    .orderBy("createdAt","asc")
+    .limitToLast(100)
+    .onSnapshot(snap=>{
+      box.innerHTML="";
+      if(snap.empty){
+        box.innerHTML='<div class="no-chat">Abhi koi comment nahi. Pehle aap likhein! 👋</div>';
+        return;
+      }
+      snap.forEach(doc=>{
+        const d=doc.data();
+        const div=document.createElement("div");
+        div.className="chat-message";
+        div.innerHTML=`
+          <div class="chat-name">${escapeHTML(d.name||"Guest")}</div>
+          <div class="chat-text">${escapeHTML(d.text||"")}</div>
+          <div class="chat-time">${formatChatTime(d.createdAt)}</div>`;
+        box.appendChild(div);
+      });
+      box.scrollTop=box.scrollHeight;
+    },err=>{
+      console.error(err);
+      box.innerHTML='<div class="no-chat">Comments load nahi ho rahe. Firestore rules check karein.</div>';
+    });
 }
 
+function closeComments(){
+  document.getElementById("cm").style.display="none";
+  if(cmUnsub){cmUnsub();cmUnsub=null}
+  cmMovieId=null;
+}
 
-/* Load messages */
+document.getElementById("cmForm").addEventListener("submit",async(e)=>{
+  e.preventDefault();
+  const name=document.getElementById("cmName").value.trim();
+  const textEl=document.getElementById("cmText");
+  const text=textEl.value.trim();
+  if(!name||!text||!cmMovieId) return;
+
+  const btn=document.getElementById("cmSend");
+  btn.disabled=true;
+  try{
+    await db.collection("movieChats").doc(cmMovieId).collection("messages").add({
+      name:name,
+      text:text,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    try{localStorage.setItem("cineworld_chat_name",name)}catch(e){}
+    textEl.value="";
+  }catch(err){
+    console.error(err);
+    alert("Comment send nahi hua. Firestore rules check karein.");
+  }
+  btn.disabled=false;
+});
+
+/* ========== GENERAL CHAT ========== */
+const chatMessages=document.getElementById("chatMessages");
+const chatForm=document.getElementById("chatForm");
+const chatName=document.getElementById("chatName");
+const chatInput=document.getElementById("chatInput");
+const chatSend=document.getElementById("chatSend");
+
+try{
+  const saved=localStorage.getItem("cineworld_chat_name");
+  if(saved) chatName.value=saved;
+}catch(e){}
 
 function loadChat(){
-
-  db.collection("chat")
-    .orderBy("createdAt","desc")
-    .limit(100)
-    .onSnapshot(
-
-      snapshot=>{
-
-        chatMessages.innerHTML="";
-
-
-        if(snapshot.empty){
-
-          chatMessages.innerHTML=`
-
-            <div class="no-chat">
-
-              Abhi koi message nahi.
-              Sab se pehle aap message karein! 👋
-
-            </div>
-
-          `;
-
-          return;
-
-        }
-
-
-        const messages=[];
-
-
-        snapshot.forEach(doc=>{
-
-          messages.push({
-            id:doc.id,
-            ...doc.data()
-          });
-
-        });
-
-
-        messages.reverse();
-
-
-        messages.forEach(message=>{
-
-          const div=
-            document.createElement("div");
-
-          div.className="chat-message";
-
-
-          div.innerHTML=`
-
-            <div class="chat-name">
-
-              ${escapeHTML(
-                message.name || "Guest"
-              )}
-
-            </div>
-
-
-            <div class="chat-text">
-
-              ${escapeHTML(
-                message.text || ""
-              )}
-
-            </div>
-
-
-            <div class="chat-time">
-
-              ${formatChatTime(
-                message.createdAt
-              )}
-
-            </div>
-
-          `;
-
-
-          chatMessages.appendChild(div);
-
-        });
-
-
-        chatMessages.scrollTop=
-          chatMessages.scrollHeight;
-
-      },
-
-      error=>{
-
-        console.error(
-          "Chat error:",
-          error
-        );
-
-
-        chatMessages.innerHTML=`
-
-          <div class="no-chat">
-
-            Chat abhi load nahi ho raha.
-            Firebase Firestore check karein.
-
-          </div>
-
-        `;
-
+  db.collection("chat").orderBy("createdAt","desc").limit(100).onSnapshot(
+    snapshot=>{
+      chatMessages.innerHTML="";
+      if(snapshot.empty){
+        chatMessages.innerHTML='<div class="no-chat">Abhi koi message nahi. Sab se pehle aap message karein! 👋</div>';
+        return;
       }
-
-    );
-
+      const messages=[];
+      snapshot.forEach(doc=>messages.push({id:doc.id,...doc.data()}));
+      messages.reverse();
+      messages.forEach(message=>{
+        const div=document.createElement("div");
+        div.className="chat-message";
+        div.innerHTML=`
+          <div class="chat-name">${escapeHTML(message.name||"Guest")}</div>
+          <div class="chat-text">${escapeHTML(message.text||"")}</div>
+          <div class="chat-time">${formatChatTime(message.createdAt)}</div>`;
+        chatMessages.appendChild(div);
+      });
+      chatMessages.scrollTop=chatMessages.scrollHeight;
+    },
+    error=>{
+      console.error("Chat error:",error);
+      chatMessages.innerHTML='<div class="no-chat">Chat abhi load nahi ho raha. Firebase Firestore check karein.</div>';
+    }
+  );
 }
 
+chatForm.addEventListener("submit",async function(e){
+  e.preventDefault();
+  const name=chatName.value.trim();
+  const text=chatInput.value.trim();
+  if(!name||!text) return;
+  if(name.length>30){alert("Name bohat lamba hai.");return}
+  if(text.length>300){alert("Message bohat lamba hai.");return}
 
-/* Send message */
-
-chatForm.addEventListener(
-  "submit",
-  async function(e){
-
-    e.preventDefault();
-
-
-    const name=
-      chatName.value.trim();
-
-    const text=
-      chatInput.value.trim();
-
-
-    if(!name || !text){
-      return;
-    }
-
-
-    if(name.length>30){
-      alert("Name bohat lamba hai.");
-      return;
-    }
-
-
-    if(text.length>300){
-      alert("Message bohat lamba hai.");
-      return;
-    }
-
-
-    chatSend.disabled=true;
-
-    chatSend.textContent="Sending...";
-
-
-    try{
-
-      await db.collection("chat").add({
-
-        name:name,
-
-        text:text,
-
-        createdAt:
-          firebase.firestore.FieldValue
-          .serverTimestamp()
-
-      });
-
-
-      try{
-
-        localStorage.setItem(
-          "cineworld_chat_name",
-          name
-        );
-
-      }
-      catch(e){}
-
-
-      chatInput.value="";
-
-    }
-    catch(error){
-
-      console.error(error);
-
-      alert(
-        "Message send nahi hua. Firebase Firestore check karein."
-      );
-
-    }
-
-
-    chatSend.disabled=false;
-
-    chatSend.textContent="Send";
-
+  chatSend.disabled=true;
+  chatSend.textContent="Sending...";
+  try{
+    await db.collection("chat").add({
+      name:name,
+      text:text,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    try{localStorage.setItem("cineworld_chat_name",name)}catch(e){}
+    chatInput.value="";
+  }catch(error){
+    console.error(error);
+    alert("Message send nahi hua. Firebase Firestore check karein.");
   }
-);
+  chatSend.disabled=false;
+  chatSend.textContent="Send";
+});
 
-
-/* =========================
-   START
-========================= */
-
+/* ========== START ========== */
 render();
-
 loadChat();
-
 </script>
-
 </body>
 </html>
