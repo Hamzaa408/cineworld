@@ -3665,6 +3665,11 @@ chatForm.addEventListener("submit",async(e)=>{
 render();
 applyFilters();
 loadChat();
+  new MutationObserver(function(){
+  var t=document.getElementById("rmTitle");
+  var fixed=t.textContent.replace(/\((\d{4})\)\s*\(\1\)$/,"($1)");
+  if(fixed!==t.textContent) t.textContent=fixed;
+}).observe(document.getElementById("rmTitle"),{childList:true});
 </script>
 </body>
 </html>
