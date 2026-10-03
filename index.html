@@ -12,13 +12,17 @@ body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,sans-serif}
 header{padding:25px 15px;background:#151515;text-align:center}
 .logo{font-size:34px;font-weight:bold;color:#e50914}
 header p{color:#aaa;margin:8px 0 0}
-.search{display:block;width:90%;max-width:600px;margin:25px auto 12px;padding:15px;border:1px solid #333;border-radius:10px;background:#1b1b1b;color:#fff;font-size:16px;outline:none}
-.filters{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;max-width:600px;margin:0 auto 10px;padding:0 12px}
-.chip{padding:9px 16px;border:1px solid #333;border-radius:20px;background:#1b1b1b;color:#ddd;font-size:14px;font-weight:bold;cursor:pointer}
-.chip.active{background:#e50914;border-color:#e50914;color:#fff}
-#yearSel{padding:9px 12px;border:1px solid #333;border-radius:20px;background:#1b1b1b;color:#fff;font-size:14px;font-weight:bold;outline:none}
-.count{text-align:center;color:#777;font-size:12px;margin:6px 0 0}
-h1{text-align:center;margin:22px 0 18px}
+.topbar{position:sticky;top:0;z-index:50;background:#151515;border-bottom:1px solid #292929}
+.tabs{display:flex;gap:8px;padding:10px 10px 0}
+.tabs button{flex:1;background:#222;color:#fff;border:1px solid #333;padding:12px 8px;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
+.tabs button.active{background:#e50914;border-color:#e50914}
+.menu{display:flex;gap:8px;overflow-x:auto;padding:10px;scrollbar-width:none}
+.menu::-webkit-scrollbar{display:none}
+.menu button,.menu select{flex-shrink:0;background:#222;color:#fff;border:1px solid #333;padding:9px 16px;border-radius:20px;font-size:14px;font-weight:bold;white-space:nowrap;cursor:pointer;outline:none}
+.menu button.active,.menu select.active{background:#e50914;border-color:#e50914}
+.empty-msg{grid-column:1/-1;text-align:center;color:#777;padding:40px 10px}
+.search{display:block;width:90%;max-width:600px;margin:25px auto;padding:15px;border:1px solid #333;border-radius:10px;background:#1b1b1b;color:#fff;font-size:16px;outline:none}
+h1{text-align:center;margin:30px 0 20px}
 .movies{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;padding:15px;max-width:1200px;margin:auto}
 .card{background:#171717;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px #000;display:flex;flex-direction:column}
 .poster{height:250px;background:#292929;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -71,7 +75,6 @@ h1{text-align:center;margin:22px 0 18px}
 .chat-send:disabled{opacity:.5}
 .chat-note{text-align:center;color:#666;font-size:11px;padding:8px}
 .no-chat{color:#666;text-align:center;padding:40px 10px}
-.empty{grid-column:1/-1;color:#777;text-align:center;padding:40px 10px}
 @media(min-width:700px){.movies{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
@@ -82,13 +85,22 @@ h1{text-align:center;margin:22px 0 18px}
   <p>Movies • Reviews • Trailers</p>
 </header>
 
+<div class="topbar">
+  <nav class="tabs" id="tabs">
+    <button class="active" data-type="released">🎬 Released Movies</button>
+    <button data-type="upcoming">⏳ Upcoming Movies</button>
+  </nav>
+  <nav class="menu" id="menu">
+    <button class="active" data-ind="all">All</button>
+    <button data-ind="bollywood">Bollywood</button>
+    <button data-ind="tollywood">Tollywood</button>
+    <button data-ind="hollywood">Hollywood</button>
+    <select id="yearSelect"><option value="all">Years</option></select>
+  </nav>
+</div>
+
 <input class="search" id="search" type="text" placeholder="Search movies...">
-
-<div class="filters" id="indBtns"></div>
-<div class="filters"><select id="yearSel"></select></div>
-<div class="count" id="countText"></div>
-
-<h1>Latest Movies</h1>
+<h1>Released Movies</h1>
 <div class="movies" id="movieList"></div>
 
 <section class="chat-section">
@@ -134,11 +146,6 @@ h1{text-align:center;margin:22px 0 18px}
   </div>
 </div>
 
-<!-- MOVIES LIST: movies1.js, movies2.js, movies3.js se aati hai -->
-<script src="movies1.js"></script>
-<script src="movies2.js"></script>
-<script src="movies3.js"></script>
-
 <script>
 /* ========== FIREBASE ========== */
 const firebaseConfig = {
@@ -152,19 +159,2859 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* ========== MOVIES (teen files ko jodta hai) ========== */
-const movies=[].concat(
-  typeof MOVIES1!=="undefined"?MOVIES1:[],
-  typeof MOVIES2!=="undefined"?MOVIES2:[],
-  typeof MOVIES3!=="undefined"?MOVIES3:[]
-);
+/* ========== MOVIES ========== */
+const movies = [
+  {
+    id: "deadpool-wolverine",
+    title: "Deadpool & Wolverine",
+    year: "2024",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+    trailerId: "73_1biulkYk",
+    rating: "IMDb 7.6 • RT 78%",
+    budget: "$200 million",
+    boxOffice: "$1.34 billion",
+    status: "Blockbuster Hit",
+    review: "Ryan Reynolds aur Hugh Jackman pehli baar screen share karte hain, aur ye jodi expectations se zyada mazedaar nikalti hai."
+  },
+  {
+    id: "wonder-woman-1984",
+    title: "Wonder Woman 1984",
+    year: "2020",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
+    trailerId: "sfM7_JLk-84",
+    rating: "IMDb 5.4 • RT 59%",
+    budget: "$200 million",
+    boxOffice: "$170 million",
+    status: "Flop",
+    review: "Gal Gadot ek baar phir Diana Prince ke roop mein wapas aati hain, is baar 1980s ki rangeen duniya mein."
+  },
+  {
+    id: "super-mario-bros-movie",
+    title: "The Super Mario Bros. Movie",
+    year: "2023",
+    genre: "Animation",
+    poster: "https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",
+    trailerId: "TnGl01FkMMo",
+    rating: "IMDb 7.0 • RT 88%",
+    budget: "$100 million",
+    boxOffice: "$1.36 billion",
+    status: "Blockbuster Hit",
+    review: "Video game duniya bilkul sahi andaz mein screen par utaari gayi hai."
+  },
+  {
+    id: "dune-part-two",
+    title: "Dune: Part Two",
+    year: "2024",
+    genre: "Sci-Fi",
+    poster: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+    trailerId: "Way9Dexny3w",
+    rating: "IMDb 8.5 • RT 92%",
+    budget: "$190 million",
+    boxOffice: "$714 million",
+    status: "Hit",
+    review: "Denis Villeneuve ne is sci-fi epic ko aur bhi bada aur behtareen bana diya hai."
+  },
+  {
+    id: "spiderman-no-way-home",
+    title: "Spider-Man: No Way Home",
+    year: "2021",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
+    trailerId: "JfVOs4VSpmA",
+    rating: "IMDb 8.2 • RT 93%",
+    budget: "$200 million",
+    boxOffice: "$1.9 billion",
+    status: "Blockbuster Hit",
+    review: "Multiverse khul gaya, purane villains wapas! MCU ki best Spider-Man movie."
+  },
+  {
+    id: "avengers-endgame",
+    title: "Avengers: Endgame",
+    year: "2019",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg",
+    trailerId: "TcMBFSGVi1c",
+    rating: "IMDb 8.4 • RT 94%",
+    budget: "$356 million",
+    boxOffice: "$2.8 billion",
+    status: "All-Time Blockbuster",
+    review: "Marvel ki das saal ki kahani ka epic anjaam. Har character ko poora waqt milta hai."
+  },
+  {
+    id: "avengers-doomsday",
+    title: "Avengers: Doomsday",
+    year: "2026",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg",
+    trailerId: "5BOvC328DHY",
+    rating: "Abhi release nahi hui",
+    budget: "TBA",
+    boxOffice: "Release ke baad update hoga",
+    status: "Coming Soon",
+    review: "18 December 2026 ko release hogi."
+  },
+  {
+    id: "the-avengers-2012",
+    title: "The Avengers (2012)",
+    year: "2012",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
+    trailerId: "1hPpG4s3-O4",
+    rating: "IMDb 8.0 • RT 91%",
+    budget: "$220 million",
+    boxOffice: "$1.5 billion",
+    status: "Super Hit",
+    review: "Pehli baar saare superheroes ek saath! Loki ki dhulai aur New York wali ladai."
+  },
+  {
+    id: "avengers-age-of-ultron-2015",
+    title: "Avengers: Age of Ultron (2015)",
+    year: "2015",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/4ssDuvEDkSArWEdyBl2X5EHvYKU.jpg",
+    trailerId: "tmeOjFno6Do",
+    rating: "IMDb 7.3 • RT 76%",
+    budget: "$365 million",
+    boxOffice: "$1.4 billion",
+    status: "Super Hit",
+    review: "Ultron ne Avengers ko tod diya, par team ne phir se jod diya."
+  },
+  {
+    id: "avengers-infinity-war-2018",
+    title: "Avengers: Infinity War (2018)",
+    year: "2018",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
+    trailerId: "6ZfuNTqbHE8",
+    rating: "IMDb 8.4 • RT 85%",
+    budget: "$325 million",
+    boxOffice: "$2.0 billion",
+    status: "Blockbuster Hit",
+    review: "Thanos ne aate hi sabko hila diya. Avengers ki ab tak ki sab se emotional movie!"
+  },
+  {
+    id: "captain-america-civil-war-2016",
+    title: "Captain America: Civil War (2016)",
+    year: "2016",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg",
+    trailerId: "dKrVegVI0Us",
+    rating: "IMDb 7.8 • RT 90%",
+    budget: "$250 million",
+    boxOffice: "$1.1 billion",
+    status: "Super Hit",
+    review: "Avengers vs Avengers! Cap aur Iron Man ki ladai."
+  },
+  {
+    id: "iron-man-2008",
+    title: "Iron Man (2008)",
+    year: "2008",
+    genre: "Action",
+    poster: "https://raw.githubusercontent.com/Hamzaa408/cineworld/main/mf614hti1r9b1.jpg",
+    trailerId: "ofkcLgzNZGM",
+    rating: "IMDb 7.9 • RT 94%",
+    budget: "$140 million",
+    boxOffice: "$585 million",
+    status: "Super Hit",
+    review: "Jahan se Marvel shuru hua! Tony Stark ne gufa me suit banaya."
+  },
+  {
+    id: "thor-2011",
+    title: "Thor (2011)",
+    year: "2011",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/prSfAi1xGrhLQNxVSUFh61xQ4Qy.jpg",
+    trailerId: "JOddp-nlNvQ",
+    rating: "IMDb 7.0 • RT 77%",
+    budget: "$150 million",
+    boxOffice: "$449 million",
+    status: "Hit",
+    review: "Bijli ka devta jab dharti pe aaya! Thor ka hammer aur Loki ki chalaki."
+  },
+  {
+    id: "captain-america-2011",
+    title: "Captain America: The First Avenger (2011)",
+    year: "2011",
+    genre: "Action",
+    poster: "https://m.media-amazon.com/images/M/MV5BMTYzOTc2NzU3N15BMl5BanBnXkFtZTcwNjY3MDE3NQ@@._V1_FMjpg_UX1000_.jpg",
+    trailerId: "JerVrbLldXw",
+    rating: "IMDb 6.9 • RT 80%",
+    budget: "$140 million",
+    boxOffice: "$370 million",
+    status: "Hit",
+    review: "Steve Rogers ki kahani! Dubla patla ladka kaise Captain America bana."
+  },
+  {
+    id: "iron-man-3-2013",
+    title: "Iron Man 3 (2013)",
+    year: "2013",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/qhPtAc1TKbMPqNvcdXSOn9Bn7hZ.jpg",
+    trailerId: "BoohRoVA9WQ",
+    rating: "IMDb 7.1 • RT 79%",
+    budget: "$200 million",
+    boxOffice: "$1.2 Billion",
+    status: "Blockbuster",
+    review: "Tony ka ghar toot gaya, suit bhi gaya! Ab asli Iron Man kaise ladega?"
+  },
+  {
+    id: "thor-dark-world-2013",
+    title: "Thor: The Dark World (2013)",
+    year: "2013",
+    genre: "Action",
+    poster: "https://m.media-amazon.com/images/M/MV5BMTQyNzAwOTUxOF5BMl5BanBnXkFtZTcwMTE0OTc5OQ@@._V1_FMjpg_UX1000_.jpg",
+    trailerId: "pXW3pCfbP-4",
+    rating: "IMDb 6.8 • RT 66%",
+    budget: "$170 million",
+    boxOffice: "$644 million",
+    status: "Super Hit",
+    review: "Thor vs Dark Elves! Jane Foster ko ajeeb taqat lagi."
+  },
+  {
+    id: "captain-winter-soldier-2014",
+    title: "Captain America: The Winter Soldier (2014)",
+    year: "2014",
+    genre: "Action",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Captain_America_The_Winter_Soldier_poster.jpg",
+    trailerId: "NLWsK1ZibxI",
+    rating: "IMDb 7.7 • RT 90%",
+    budget: "$170 million",
+    boxOffice: "$714 million",
+    status: "Blockbuster",
+    review: "SHIELD me gaddar! Captain ka purana dost Bucky ab dushman ban gaya."
+  },
+  {
+    id: "iron-man-2-2010",
+    title: "Iron Man 2 (2010)",
+    year: "2010",
+    genre: "Action",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Iron_Man_2_poster.jpg",
+    trailerId: "BoohRoVA9WQ",
+    rating: "IMDb 7.0 • RT 72%",
+    budget: "$200 million",
+    boxOffice: "$623 million",
+    status: "Super Hit",
+    review: "Tony ne bola 'I am Iron Man' to sab peeche pad gaye! War Machine ki entry!"
+  },
+  {
+    id: "thor-ragnarok-2017",
+    title: "Thor: Ragnarok (2017)",
+    year: "2017",
+    genre: "Action, Comedy",
+    poster: "https://m.media-amazon.com/images/M/MV5BMjMyNDkzMzI1OF5BMl5BanBnXkFtZTgwODcxODg5MjI@._V1_FMjpg_UX1000_.jpg",
+    trailerId: "v7MGUNV8MxU",
+    rating: "IMDb 7.9 • RT 93%",
+    budget: "$180 million",
+    boxOffice: "$853 million",
+    status: "Blockbuster",
+    review: "Thor ka hammer toot gaya! Ab Hulk se ladai hogi? Full comedy + action ka dhamaka!"
+  },
+  {
+    id: "thor-love-thunder-2022",
+    title: "Thor: Love and Thunder (2022)",
+    year: "2022",
+    genre: "Action, Comedy",
+    poster: "https://image.tmdb.org/t/p/w500/pIkRyD18kl4FhoCNQuWxWu5cBLM.jpg",
+    trailerId: "Go8nTmfrQd8",
+    rating: "IMDb 6.2 • RT 63%",
+    budget: "$250 million",
+    boxOffice: "$760 million",
+    status: "Super Hit",
+    review: "Thor ko pyaar ho gaya! Jane Foster bani Mighty Thor."
+  },
+  {
+    id: "guardians-galaxy-2014",
+    title: "Guardians of the Galaxy (2014)",
+    year: "2014",
+    genre: "Action, Comedy",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Guardians_of_the_Galaxy_%28film%29_poster.jpg",
+    trailerId: "d96cjJhvlMA",
+    rating: "IMDb 8.0 • RT 92%",
+    budget: "$232 million",
+    boxOffice: "$773 million",
+    status: "Blockbuster",
+    review: "Chor logon ki team! Star-Lord, Groot, Rocket sab ne milke galaxy bachayi!"
+  },
+  {
+    id: "guardians-galaxy-vol2-2017",
+    title: "Guardians of the Galaxy Vol. 2 (2017)",
+    year: "2017",
+    genre: "Action, Comedy",
+    poster: "https://image.tmdb.org/t/p/w500/y4MBh0EjBlMuOzv9axM4qJlmhzz.jpg",
+    trailerId: "pr7R5HDwUzM",
+    rating: "IMDb 7.6 • RT 85%",
+    budget: "$200 million",
+    boxOffice: "$863 million",
+    status: "Blockbuster",
+    review: "Star-Lord ka baap nikla poora planet! Baby Groot ne to dil jeet liya."
+  },
+  {
+    id: "guardians-galaxy-vol3-2023",
+    title: "Guardians of the Galaxy Vol. 3 (2023)",
+    year: "2023",
+    genre: "Action, Comedy",
+    poster: "https://image.tmdb.org/t/p/w500/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg",
+    trailerId: "u3V5KDHRQvk",
+    rating: "IMDb 8.0 • RT 82%",
+    budget: "$250 million",
+    boxOffice: "$845 million",
+    status: "Blockbuster",
+    review: "Rocket ki kahani! Sabse emotional Guardians movie."
+  },
+  {
+    id: "ant-man-2015",
+    title: "Ant-Man (2015)",
+    year: "2015",
+    genre: "Action, Comedy",
+    poster: "https://m.media-amazon.com/images/M/MV5BMjM2NTQ5Mzc2M15BMl5BanBnXkFtZTgwNTcxMDI2NTE@._V1_FMjpg_UX1000_.jpg",
+    trailerId: "pWdKf3MneyI",
+    rating: "IMDb 7.3 • RT 83%",
+    budget: "$130 million",
+    boxOffice: "$519 million",
+    status: "Super Hit",
+    review: "Chor bana superhero! Scott Lang chota ho jata hai."
+  },
+  {
+    id: "doctor-strange-2016",
+    title: "Doctor Strange (2016)",
+    year: "2016",
+    genre: "Action, Fantasy",
+    poster: "https://m.media-amazon.com/images/M/MV5BNjgwNzAzNjk1Nl5BMl5BanBnXkFtZTgwMzQ2NjI1OTE@._V1_FMjpg_UX1000_.jpg",
+    trailerId: "HSzx-zryEgM",
+    rating: "IMDb 7.5 • RT 89%",
+    budget: "$165 million",
+    boxOffice: "$677 million",
+    status: "Super Hit",
+    review: "Doctor se jadugar ban gaya! Time ko ghumata hai, dimension ka khela!"
+  },
+  {
+    id: "doctor-strange-multiverse-2022",
+    title: "Doctor Strange in the Multiverse of Madness (2022)",
+    year: "2022",
+    genre: "Action, Horror",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Doctor_Strange_in_the_Multiverse_of_Madness_poster.jpg",
+    trailerId: "aWzlQ2N4qqg",
+    rating: "IMDb 6.9 • RT 74%",
+    budget: "$200 million",
+    boxOffice: "$952 million",
+    status: "Blockbuster",
+    review: "Multiverse khul gaya! Wanda pagal ho gayi, sab universe tabah!"
+  },
+  {
+    id: "black-panther-2018",
+    title: "Black Panther (2018)",
+    year: "2018",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/uxzzxijgPIY7slzFvMotPv8wjKA.jpg",
+    trailerId: "xjDjIWPwcV5",
+    rating: "IMDb 7.3 • RT 96%",
+    budget: "$200 million",
+    boxOffice: "$1.3 Billion",
+    status: "Blockbuster",
+    review: "Wakanda ka raja! T'Challa ko apne bhai Killmonger se ladna hai!"
+  },
+  {
+    id: "black-panther-wakanda-forever-2022",
+    title: "Black Panther: Wakanda Forever (2022)",
+    year: "2022",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/sv1xJUazXeYqALzczSZ3O6nkH75.jpg",
+    trailerId: "_Z3QKkl1WyM",
+    rating: "IMDb 6.7 • RT 84%",
+    budget: "$250 million",
+    boxOffice: "$859 million",
+    status: "Blockbuster",
+    review: "T'Challa ke baad Wakanda kaise bachega? Shuri bani nayi Black Panther!"
+  },
+  {
+    id: "spider-man-homecoming-2017",
+    title: "Spider-Man: Homecoming (2017)",
+    year: "2017",
+    genre: "Action, Comedy",
+    poster: "https://image.tmdb.org/t/p/w500/c24sv2weTHPsmDa7jEMN0m2P3RT.jpg",
+    trailerId: "n9DwoQ7HWvM",
+    rating: "IMDb 7.4 • RT 92%",
+    budget: "$175 million",
+    boxOffice: "$880 million",
+    status: "Blockbuster",
+    review: "Chota Spider-Man! Tony Stark ne suit diya, Vulture se ladai!"
+  },
+  {
+    id: "spider-man-far-from-home-2019",
+    title: "Spider-Man: Far From Home (2019)",
+    year: "2019",
+    genre: "Action, Comedy",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Spider-Man_Far_From_Home_poster.jpg",
+    trailerId: "DYYtuKyMt_Y",
+    rating: "IMDb 7.4 • RT 90%",
+    budget: "$160 million",
+    boxOffice: "$1.1 Billion",
+    status: "Blockbuster",
+    review: "Europe trip gaya ulta! Mysterio ne sabko ullu banaya."
+  },
+  {
+    id: "spider-man-brand-new-day-2026",
+    title: "Spider-Man: Brand New Day (2026)",
+    year: "2026",
+    genre: "Action",
+    poster: "https://image.tmdb.org/t/p/w500/9JCQtDCSpPR2ld55yNlEg1VwcQo.jpg",
+    trailerId: "JfVOs4VSpmA",
+    rating: "IMDb 8.2 • RT 90%",
+    budget: "$200 million",
+    boxOffice: "$2.48B",
+    status: "Most Awaited",
+    review: "No Way Home ke baad sab bhool gaye Peter ko! Ab naya start."
+  },
+  {
+    id: "avatar-2009",
+    title: "Avatar (2009)",
+    year: "2009",
+    genre: "Sci-Fi",
+    poster: "https://image.tmdb.org/t/p/w500/6EiRUJpuoeQPghrs3YNktfnqOVh.jpg",
+    trailerId: "5PSNL1qE6VY",
+    rating: "IMDb 7.9 • RT 81%",
+    budget: "$237 million",
+    boxOffice: "$2.92 billion",
+    status: "All-Time Blockbuster",
+    review: "James Cameron ki duniya Pandora! Full visual jadoo hai."
+  },
+  {
+    id: "avatar-way-of-water-2022",
+    title: "Avatar: The Way of Water (2022)",
+    year: "2022",
+    genre: "Sci-Fi",
+    poster: "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
+    trailerId: "d9MyW72ELq0",
+    rating: "IMDb 7.6 • RT 76%",
+    budget: "$350 million",
+    boxOffice: "$2.32 billion",
+    status: "Blockbuster Hit",
+    review: "13 saal baad Pandora wapas! Samundar wala Na'vi qabeele."
+  },
+  {
+    id: "avatar-fire-and-ash-2025",
+    title: "Avatar: Fire and Ash (2025)",
+    year: "2025",
+    genre: "Sci-Fi",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Avatar_Fire_and_Ash_poster.jpeg",
+    trailerId: "Ma1x7ikpid8",
+    rating: "IMDb 7.8 • RT 78%",
+    budget: "$400 million",
+    boxOffice: "$1.2 billion",
+    status: "Blockbuster Hit",
+    review: "19 Dec 2025 ko release hui! Aag wale Ash People Na'vi."
+  },
+  {
+    id: "incredible-hulk-2008",
+    title: "The Incredible Hulk (2008)",
+    year: "2008",
+    genre: "Action, Sci-Fi",
+    poster: "https://raw.githubusercontent.com/Hamzaa408/cineworld/main/The_Incredible_Hulk_%28film%29_poster.jpg",
+    trailerId: "xbqNb2PFB08",
+    rating: "IMDb 6.5 • RT 67%",
+    budget: "$150 million",
+    boxOffice: "$265 million",
+    status: "Hit",
+    review: "Bruce Banner jab gussa hota hai to Hulk ban jata hai! Army se ladai aur Abomination se takkar, full action!"
+  },
+  {
+    id: "ant-man-wasp-2018",
+    title: "Ant-Man and the Wasp (2018)",
+    year: "2018",
+    genre: "Action, Comedy",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Ant-Man_and_the_Wasp_poster.jpg",
+    trailerId: "8_rTIAOohas",
+    rating: "IMDb 7.0 • RT 87%",
+    budget: "$162 million",
+    boxOffice: "$622 million",
+    status: "Blockbuster",
+    review: "Scott Lang aur Hope Van Dyne ek nayi mission par nikalte hain. Action aur comedy dono ka zabardast combination."
+  },
+  {
+    id: "captain-marvel-2019",
+    title: "Captain Marvel (2019)",
+    year: "2019",
+    genre: "Action, Sci-Fi",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Captain_Marvel_(film)_poster.jpg",
+    trailerId: "Z1BCujX3pw8",
+    rating: "IMDb 6.8 • RT 79%",
+    budget: "$152 million",
+    boxOffice: "$1.13 billion",
+    status: "Blockbuster",
+    review: "Carol Danvers ka origin aur uska Captain Marvel banne ka safar."
+  },
+  {
+    id: "black-widow-2021",
+    title: "Black Widow (2021)",
+    year: "2021",
+    genre: "Action, Thriller",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Black_Widow_(2021_film)_poster.jpg",
+    trailerId: "ybji16u608U",
+    rating: "IMDb 6.7 • RT 79%",
+    budget: "$200 million",
+    boxOffice: "$379 million",
+    status: "Super Hit",
+    review: "Natasha Romanoff ki past story aur uske family connection ki kahani."
+  },
+  {
+    id: "shang-chi-2021",
+    title: "Shang-Chi and the Legend of the Ten Rings (2021)",
+    year: "2021",
+    genre: "Action, Fantasy",
+    poster: "https://image.tmdb.org/t/p/w500/1BIoJGKbXjdFDAqUEiA2VHqkK1Z.jpg",
+    trailerId: "8YjFbMbfXaQ",
+    rating: "IMDb 7.4 • RT 92%",
+    budget: "$150 million",
+    boxOffice: "$432 million",
+    status: "Blockbuster",
+    review: "Shang-Chi ko apne past ka saamna karna padta hai. Ten Rings ki power ke saath zabardast martial arts action."
+  },
+  {
+    id: "eternals-2021",
+    title: "Eternals (2021)",
+    year: "2021",
+    genre: "Action, Sci-Fi",
+    poster: "https://image.tmdb.org/t/p/w500/6AdXwFTRTAzggD2QUTt5B7JFGKL.jpg",
+    trailerId: "x_me3xsvDgk",
+    rating: "IMDb 6.3 • RT 47%",
+    budget: "$200 million",
+    boxOffice: "$402 million",
+    status: "Super Hit",
+    review: "Hazaron saal se chhupe powerful heroes duniya ko ek naye threat se bachane ke liye saamne aate hain."
+  },
+  {
+    id: "ant-man-quantumania-2023",
+    title: "Ant-Man and the Wasp: Quantumania (2023)",
+    year: "2023",
+    genre: "Action, Comedy",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Ant-Man_and_the_Wasp_Quantumania_poster.jpg",
+    trailerId: "ZlNFpri-Y40",
+    rating: "IMDb 6.0 • RT 46%",
+    budget: "$200 million",
+    boxOffice: "$476 million",
+    status: "Super Hit",
+    review: "Ant-Man family Quantum Realm mein phans jaati hai jahan Kang ka saamna hota hai."
+  },
+  {
+    id: "the-marvels-2023",
+    title: "The Marvels (2023)",
+    year: "2023",
+    genre: "Action, Sci-Fi",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/The_Marvels_poster.jpg",
+    trailerId: "wS_qbDztgVY",
+    rating: "IMDb 5.5 • RT 62%",
+    budget: "$270 million",
+    boxOffice: "$206 million",
+    status: "Average",
+    review: "Captain Marvel, Ms. Marvel aur Monica Rambeau ek saath aa jaati hain."
+  },
+  {
+    id: "captain-america-brave-new-world-2025",
+    title: "Captain America: Brave New World (2025)",
+    year: "2025",
+    genre: "Action, Thriller",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Captain_America_Brave_New_World_poster%20(1).jpg",
+    trailerId: "1pHDWnXmK7Y",
+    rating: "IMDb 7.1 • RT 85%",
+    budget: "$250 million",
+    boxOffice: "$415 million",
+    status: "Blockbuster",
+    review: "Sam Wilson naye Captain America ke roop mein ek international conspiracy ka saamna karta hai."
+  },
+  {
+    id: "thunderbolts-2025",
+    title: "Thunderbolts* (2025)",
+    year: "2025",
+    genre: "Action, Comedy",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Thunderbolts__poster.jpg",
+    trailerId: "v-94Snw-H4o",
+    rating: "IMDb 7.5 • RT 88%",
+    budget: "$200 million",
+    boxOffice: "$380 million",
+    status: "Most Awaited",
+    review: "Anti-heroes ki ek unusual team ek dangerous mission par nikalti hai."
+  },
+  {
+    id: "deadpool-2016",
+    title: "Deadpool (2016)",
+    year: "2016",
+    genre: "Action",
+    poster: "https://raw.githubusercontent.com/Hamzaa408/cineworld/main/Deadpool_(2016_poster).png",
+    trailerId: "XithL4a1baw",
+    rating: "IMDb 8.0 • RT 85%",
+    budget: "$58 million",
+    boxOffice: "$782 million",
+    status: "Super Hit",
+    review: "Wade Wilson ki mast entry! Comedy aur action ka full dose!"
+  },
+  {
+    id: "deadpool-2-2018",
+    title: "Deadpool 2 (2018)",
+    year: "2018",
+    genre: "Action",
+    poster: "https://cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/Deadpool_2_poster.jpg",
+    trailerId: "D86RtevtfrA",
+    rating: "IMDb 7.6 • RT 84%",
+    budget: "$110 million",
+    boxOffice: "$785 million",
+    status: "Super Hit",
+    review: "Deadpool double dhamaka! Zyada funny, zyada action!"
+  },
+
+  /* FAST & FURIOUS: poster Wikipedia se aayega */
+  {
+    id: "fast-furious-2001",
+    title: "The Fast and the Furious (2001)",
+    year: "2001",
+    genre: "Action",
+    poster: "",
+    wiki: "The_Fast_and_the_Furious_(2001_film)",
+    trailerId: "",
+    rating: "IMDb 6.8 • RT 54%",
+    budget: "$38 million",
+    boxOffice: "$207 million",
+    status: "Hit",
+    review: "Street racing ki duniya mein pehli baar entry! Dom aur Brian ki dosti yahin se shuru hoti hai."
+  },
+  {
+    id: "2-fast-2-furious-2003",
+    title: "2 Fast 2 Furious (2003)",
+    year: "2003",
+    genre: "Action",
+    poster: "",
+    wiki: "2_Fast_2_Furious",
+    trailerId: "",
+    rating: "IMDb 5.9 • RT 36%",
+    budget: "$76 million",
+    boxOffice: "$236 million",
+    status: "Hit",
+    review: "Brian Miami mein naye partner ke saath, races aur ek dangerous mission."
+  },
+  {
+    id: "tokyo-drift-2006",
+    title: "The Fast and the Furious: Tokyo Drift (2006)",
+    year: "2006",
+    genre: "Action",
+    poster: "",
+    wiki: "The_Fast_and_the_Furious:_Tokyo_Drift",
+    trailerId: "",
+    rating: "IMDb 6.0 • RT 39%",
+    budget: "$85 million",
+    boxOffice: "$158 million",
+    status: "Average",
+    review: "Tokyo ki drift racing scene mein naya kirdar, lekin series ka sabse kam kamane wala part."
+  },
+  {
+    id: "fast-furious-2009",
+    title: "Fast & Furious (2009)",
+    year: "2009",
+    genre: "Action",
+    poster: "",
+    wiki: "Fast_&_Furious_(2009_film)",
+    trailerId: "",
+    rating: "IMDb 6.6 • RT 28%",
+    budget: "$85 million",
+    boxOffice: "$363 million",
+    status: "Super Hit",
+    review: "Dom aur Brian dobara ek team mein! Yahin se series ka asli comeback shuru hota hai."
+  },
+  {
+    id: "fast-five-2011",
+    title: "Fast Five (2011)",
+    year: "2011",
+    genre: "Action",
+    poster: "",
+    wiki: "Fast_Five",
+    trailerId: "",
+    rating: "IMDb 7.3 • RT 78%",
+    budget: "$125 million",
+    boxOffice: "$626 million",
+    status: "Blockbuster",
+    review: "Heist genre mein switch! The Rock ki entry ne series ko naya level de diya."
+  },
+  {
+    id: "fast-furious-6-2013",
+    title: "Fast & Furious 6 (2013)",
+    year: "2013",
+    genre: "Action",
+    poster: "",
+    wiki: "Fast_&_Furious_6",
+    trailerId: "",
+    rating: "IMDb 7.0 • RT 70%",
+    budget: "$160 million",
+    boxOffice: "$789 million",
+    status: "Blockbuster",
+    review: "Letty wapas aa gayi! Tank aur airplane wali action ne dhoom macha di."
+  },
+  {
+    id: "furious-7-2015",
+    title: "Furious 7 (2015)",
+    year: "2015",
+    genre: "Action",
+    poster: "",
+    wiki: "Furious_7",
+    trailerId: "",
+    rating: "IMDb 7.1 • RT 81%",
+    budget: "$190 million",
+    boxOffice: "$1.5 billion",
+    status: "Blockbuster Hit",
+    review: "Paul Walker ko emotional farewell. Series ki pehli movie jo $1 billion cross ki."
+  },
+  {
+    id: "fate-of-the-furious-2017",
+    title: "The Fate of the Furious (2017)",
+    year: "2017",
+    genre: "Action",
+    poster: "",
+    wiki: "The_Fate_of_the_Furious",
+    trailerId: "",
+    rating: "IMDb 6.6 • RT 66%",
+    budget: "$250 million",
+    boxOffice: "$1.24 billion",
+    status: "Blockbuster",
+    review: "Dom apni family ke khilaf ho jata hai! Cipher ne poori team ko hila diya."
+  },
+  {
+    id: "hobbs-shaw-2019",
+    title: "Fast & Furious Presents: Hobbs & Shaw (2019)",
+    year: "2019",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "Fast_&_Furious_Presents:_Hobbs_&_Shaw",
+    trailerId: "",
+    rating: "IMDb 6.5 • RT 67%",
+    budget: "$200 million",
+    boxOffice: "$760 million",
+    status: "Super Hit",
+    review: "Spin-off jahan dushman Hobbs aur Shaw ek team ban jate hain, full comedy aur action."
+  },
+  {
+    id: "f9-2021",
+    title: "F9: The Fast Saga (2021)",
+    year: "2021",
+    genre: "Action",
+    poster: "",
+    wiki: "F9_(film)",
+    trailerId: "",
+    rating: "IMDb 5.2 • RT 58%",
+    budget: "$200 million",
+    boxOffice: "$726 million",
+    status: "Super Hit",
+    review: "Dom ka bhula hua bhai wapas aata hai! Series ab space tak pahunch jati hai."
+  },
+  {
+    id: "fast-x-2023",
+    title: "Fast X (2023)",
+    year: "2023",
+    genre: "Action",
+    poster: "",
+    wiki: "Fast_X",
+    trailerId: "",
+    rating: "IMDb 5.8 • RT 56%",
+    budget: "$340 million",
+    boxOffice: "$714 million",
+    status: "Average",
+    review: "Dante, Hernan Reyes ka beta, family se badla lene aata hai. Series ka sabse mehnga part."
+  },
+  
+    {
+        id: "mission-impossible-1996",
+        title: "Mission: Impossible (1996)",
+        year: "1996",
+        genre: "Action, Thriller",
+        poster: "https://image.tmdb.org/t/p/w500/l5uxY5m5OInWpcExIpKG6o7IrPe.jpg",
+        wiki: "Mission:_Impossible_(film)",
+        trailerId: "YoHD9XEInc0",
+        rating: "IMDb 7.1 • RT 64%",
+        budget: "$80 million",
+        boxOffice: "$457 million",
+        status: "Super Hit",
+        review: "Ethan Hunt pe gaddari ka ilzaam lagta hai. Pehli MI jahan se kahani shuru hui.",
+    },
+    {
+        id: "mission-impossible-2-2000",
+        title: "Mission: Impossible 2 (2000)",
+        year: "2000",
+        genre: "Action, Thriller",
+        poster: "https://image.tmdb.org/t/p/w500/7us8nE3ldE1Uy2QveM2jtp3v1qS.jpg",
+        wiki: "Mission:_Impossible_2",
+        trailerId: "S1Q0R4d4Tvo",
+        rating: "IMDb 6.1 • RT 57%",
+        budget: "$125 million",
+        boxOffice: "$546 million",
+        status: "Super Hit",
+        review: "John Woo ka style, bike chase aur Chimera virus ka khatra.",
+    },
+    {
+        id: "mission-impossible-3-2006",
+        title: "Mission: Impossible 3 (2006)",
+        year: "2006",
+        genre: "Action, Thriller",
+        poster: "https://image.tmdb.org/t/p/w500/2a1p5gR1l3a1p5gR1l3.jpg",
+        wiki: "Mission:_Impossible_III",
+        trailerId: "yEI0lF0QO2w",
+        rating: "IMDb 6.9 • RT 71%",
+        budget: "$150 million",
+        boxOffice: "$398 million",
+        status: "Hit",
+        review: "JJ Abrams wala part, Ethan ki shaadi aur Rabbit's Foot ka raaz.",
+    },
+    {
+        id: "mission-impossible-ghost-protocol-2011",
+        title: "Mission: Impossible - Ghost Protocol (2011)",
+        year: "2011",
+        genre: "Action, Thriller",
+        poster: "https://image.tmdb.org/t/p/w500/7GfZJ1e3a1p5gR1l3a1p5gR1l3a1.jpg",
+        wiki: "Mission:_Impossible_–_Ghost_Protocol",
+        trailerId: "EDGYVTd0GWg",
+        rating: "IMDb 7.4 • RT 93%",
+        budget: "$145 million",
+        boxOffice: "$694 million",
+        status: "Blockbuster",
+        review: "Kremlin blast aur Dubai Burj Khalifa wala scene, IMF band ho jati hai.",
+    },
+    {
+        id: "mission-impossible-rogue-nation-2015",
+        title: "Mission: Impossible - Rogue Nation (2015)",
+        year: "2015",
+        genre: "Action, Thriller",
+        poster: "https://image.tmdb.org/t/p/w500/eIOTf0I1rk3L1g2F1Q1fQ1.jpg",
+        wiki: "Mission:_Impossible_–_Rogue_Nation",
+        trailerId: "FUihpZqZz9E",
+        rating: "IMDb 7.4 • RT 94%",
+        budget: "$150 million",
+        boxOffice: "$682 million",
+        status: "Blockbuster",
+        review: "Syndicate ka khatma, Ilsa Faust ki entry.",
+    },
+    {
+        id: "mission-impossible-fallout-2018",
+        title: "Mission: Impossible - Fallout (2018)",
+        year: "2018",
+        genre: "Action, Thriller",
+        poster: "https://image.tmdb.org/t/p/w500/AkJQpZp9WoNdj7pLYSj1L0RcMMN.jpg",
+        wiki: "Mission:_Impossible_–_Fallout",
+        trailerId: "wb49-oV0F78",
+        rating: "IMDb 7.7 • RT 97%",
+        budget: "$178 million",
+        boxOffice: "$791 million",
+        status: "Blockbuster Hit",
+        review: "Best MI movie, Henry Cavill vs Tom Cruise, helicopter chase.",
+    },
+    {
+        id: "mission-impossible-dead-reckoning-2023",
+        title: "Mission: Impossible - Dead Reckoning (2023)",
+        year: "2023",
+        genre: "Action, Thriller",
+        poster: "https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYAmhP2.jpg",
+        wiki: "Mission:_Impossible_–_Dead_Reckoning_Part_One",
+        trailerId: "a5S4sdp155o",
+        rating: "IMDb 7.6 • RT 96%",
+        budget: "$291 million",
+        boxOffice: "$567 million",
+        status: "Super Hit",
+        review: "AI Entity ka khatra, duniya ka sabse khatarnak AI.",
+    },
+    {
+        id: "mission-impossible-final-reckoning-2025",
+        title: "Mission: Impossible - The Final Reckoning (2025)",
+        year: "2025",
+        genre: "Action, Thriller",
+        poster: "https://image.tmdb.org/t/p/w500/z53D72EAOxGRqdr7KXXWp9dJiDe.jpg",
+        wiki: "Mission:_Impossible_–_The_Final_Reckoning",
+        trailerId: "2m1Wu2B1e3I",
+        rating: "IMDb 7.8 • RT 85%",
+        budget: "$400 million",
+        boxOffice: "Coming Soon",
+        status: "Most Awaited",
+        review: "Ethan Hunt ka akhri mission, Entity ko hamesha ke liye khatam karna hai. 23 May 2025 release.",
+    },
+      {
+    id: "man-of-steel-2013",
+    title: "Man of Steel (2013)",
+    year: "2013",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "Man_of_Steel_(film)",
+    trailerId: "T6DJcgm3wNY",
+    rating: "IMDb 7.0 • RT 56%",
+    budget: "$225 million",
+    boxOffice: "$668 million",
+    status: "Super Hit",
+    review: "Superman ka origin, Zack Snyder wala dark style jahan se DCEU shuru hua.",
+  },
+  {
+    id: "batman-v-superman-2016",
+    title: "Batman v Superman: Dawn of Justice (2016)",
+    year: "2016",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "Batman_v_Superman:_Dawn_of_Justice",
+    trailerId: "0WWzgGyAH6Y",
+    rating: "IMDb 6.4 • RT 29%",
+    budget: "$250 million",
+    boxOffice: "$873 million",
+    status: "Super Hit",
+    review: "Batman vs Superman, pehli baar dono screen pe takraye aur Wonder Woman ki entry.",
+  },
+  {
+    id: "suicide-squad-2016",
+    title: "Suicide Squad (2016)",
+    year: "2016",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "Suicide_Squad_(2016_film)",
+    trailerId: "CmRih_VtVAs",
+    rating: "IMDb 5.9 • RT 26%",
+    budget: "$175 million",
+    boxOffice: "$746 million",
+    status: "Super Hit",
+    review: "Villains ki team, Harley Quinn aur Joker ka pagalpan.",
+  },
+  {
+    id: "wonder-woman-2017",
+    title: "Wonder Woman (2017)",
+    year: "2017",
+    genre: "Action, Fantasy",
+    poster: "",
+    wiki: "Wonder_Woman_(2017_film)",
+    trailerId: "VSB4wGIdDwo",
+    rating: "IMDb 7.4 • RT 93%",
+    budget: "$149 million",
+    boxOffice: "$822 million",
+    status: "Blockbuster",
+    review: "Diana ka WWI me pehla mission, DCEU ki sabse best movie.",
+  },
+  {
+    id: "justice-league-2017",
+    title: "Justice League (2017)",
+    year: "2017",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "Justice_League_(film)",
+    trailerId: "3cxixDgHUYw",
+    rating: "IMDb 6.1 • RT 39%",
+    budget: "$300 million",
+    boxOffice: "$657 million",
+    status: "Hit",
+    review: "Saare heroes ek saath, Steppenwolf se ladai.",
+  },
+  {
+    id: "aquaman-2018",
+    title: "Aquaman (2018)",
+    year: "2018",
+    genre: "Action, Fantasy",
+    poster: "",
+    wiki: "Aquaman_(film)",
+    trailerId: "WDkg3h8PCVU",
+    rating: "IMDb 6.8 • RT 65%",
+    budget: "$200 million",
+    boxOffice: "$1.14 billion",
+    status: "Blockbuster Hit",
+    review: "Samundar ka raja Arthur Curry, Atlantis ki jung.",
+  },
+  {
+    id: "shazam-2019",
+    title: "Shazam! (2019)",
+    year: "2019",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "Shazam!_(film)",
+    trailerId: "go6GEIrcvFY",
+    rating: "IMDb 7.0 • RT 90%",
+    budget: "$100 million",
+    boxOffice: "$365 million",
+    status: "Hit",
+    review: "14 saal ka bacha bolta hai Shazam aur superhero ban jata hai, full comedy.",
+  },
+  {
+    id: "joker-2019",
+    title: "Joker (2019)",
+    year: "2019",
+    genre: "Crime, Thriller",
+    poster: "",
+    wiki: "Joker_(2019_film)",
+    trailerId: "zAGVQLHvwOY",
+    rating: "IMDb 8.4 • RT 68%",
+    budget: "$55 million",
+    boxOffice: "$1.07 billion",
+    status: "Blockbuster Hit",
+    review: "Arthur Fleck ka Joker banne ka safar, Joaquin Phoenix ki Oscar winning acting.",
+  },
+  {
+    id: "birds-of-prey-2020",
+    title: "Birds of Prey (2020)",
+    year: "2020",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "Birds_of_Prey_(2020_film)",
+    trailerId: "k2q22L2B24U",
+    rating: "IMDb 6.0 • RT 79%",
+    budget: "$84 million",
+    boxOffice: "$201 million",
+    status: "Average",
+    review: "Harley Quinn Joker se breakup ke baad apni gang banati hai.",
+  },
+  {
+    id: "the-suicide-squad-2021",
+    title: "The Suicide Squad (2021)",
+    year: "2021",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "The_Suicide_Squad_(film)",
+    trailerId: "JuDLc2yLT90",
+    rating: "IMDb 7.2 • RT 90%",
+    budget: "$185 million",
+    boxOffice: "$167 million",
+    status: "Hit",
+    review: "James Gunn wala version, zyada khoon kharaba aur zyada funny.",
+  },
+  {
+    id: "the-batman-2022",
+    title: "The Batman (2022)",
+    year: "2022",
+    genre: "Action, Crime",
+    poster: "",
+    wiki: "The_Batman_(film)",
+    trailerId: "mqqft2x_Aa4",
+    rating: "IMDb 7.7 • RT 85%",
+    budget: "$200 million",
+    boxOffice: "$770 million",
+    status: "Blockbuster",
+    review: "Robert Pattinson wala dark Batman, Riddler ke saath dimagh wali ladai.",
+  },
+  {
+    id: "black-adam-2022",
+    title: "Black Adam (2022)",
+    year: "2022",
+    genre: "Action, Fantasy",
+    poster: "",
+    wiki: "Black_Adam_(film)",
+    trailerId: "X0tOpBuYasI",
+    rating: "IMDb 6.3 • RT 39%",
+    budget: "$260 million",
+    boxOffice: "$393 million",
+    status: "Average",
+    review: "The Rock 5000 saal baad jaagta hai, JSA se takkar.",
+  },
+  {
+    id: "the-flash-2023",
+    title: "The Flash (2023)",
+    year: "2023",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "The_Flash_(film)",
+    trailerId: "hebWYacbdvc",
+    rating: "IMDb 6.7 • RT 63%",
+    budget: "$220 million",
+    boxOffice: "$270 million",
+    status: "Flop",
+    review: "Multiverse khul gaya, purane Batman Michael Keaton wapas.",
+  },
+  {
+    id: "blue-beetle-2023",
+    title: "Blue Beetle (2023)",
+    year: "2023",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "Blue_Beetle_(film)",
+    trailerId: "vS3_72Gb-bI",
+    rating: "IMDb 5.9 • RT 78%",
+    budget: "$104 million",
+    boxOffice: "$130 million",
+    status: "Average",
+    review: "Jaime Reyes ko alien beetle milta hai, naya DC hero.",
+  },
+  {
+    id: "aquaman-lost-kingdom-2023",
+    title: "Aquaman and the Lost Kingdom (2023)",
+    year: "2023",
+    genre: "Action, Fantasy",
+    poster: "",
+    wiki: "Aquaman_and_the_Lost_Kingdom",
+    trailerId: "FvRmEapoHRc",
+    rating: "IMDb 5.6 • RT 33%",
+    budget: "$215 million",
+    boxOffice: "$434 million",
+    status: "Hit",
+    review: "Aquaman aur uska bhai Orm milke Black Manta se ladte hain.",
+  },
+  {
+    id: "joker-folie-a-deux-2024",
+    title: "Joker: Folie à Deux (2024)",
+    year: "2024",
+    genre: "Crime, Musical",
+    poster: "",
+    wiki: "Joker:_Folie_à_Deux",
+    trailerId: "_OKAwz2MsJs",
+    rating: "IMDb 5.4 • RT 33%",
+    budget: "$200 million",
+    boxOffice: "$206 million",
+    status: "Flop",
+    review: "Joker aur Harley Quinn jail me, musical love story.",
+  },
+  {
+    id: "superman-2025",
+    title: "Superman (2025)",
+    year: "2025",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "Superman_(2025_film)",
+    trailerId: "uhUht6vAsMY",
+    rating: "IMDb 7.8 • RT 85%",
+    budget: "$225 million",
+    boxOffice: "Coming Soon",
+    status: "Most Awaited",
+    review: "James Gunn ka naya DCU Superman, David Corenswet wala, 11 July 2025 release.",
+  },
+    {
+    id: "supergirl-woman-of-tomorrow-2026",
+    title: "Supergirl: Woman of Tomorrow (2026)",
+    year: "2026",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "Supergirl_(2026_film)",
+    trailerId: "wQ5O4qJ5Z6A",
+    rating: "IMDb 7.2 • RT 88%",
+    budget: "$200 million",
+    boxOffice: "$126.4 million",
+    status: "Super Hit",
+    review: "James Gunn ke naye DCU ki Supergirl, Milly Alcock wali, 26 June 2026 ko release.",
+  },
+    {
+    id: "risky-business-1983",
+    title: "Risky Business (1983)",
+    year: "1983",
+    genre: "Comedy, Drama",
+    poster: "",
+    wiki: "Risky_Business",
+    trailerId: "Qz2K_J6a4JA",
+    rating: "IMDb 6.8 • RT 93%",
+    budget: "$6 million",
+    boxOffice: "$63 million",
+    status: "Super Hit",
+    review: "Tom ki pehli hit, famous underwear dance wala scene.",
+  },
+  {
+    id: "top-gun-1986",
+    title: "Top Gun (1986)",
+    year: "1986",
+    genre: "Action, Drama",
+    poster: "",
+    wiki: "Top_Gun",
+    trailerId: "xAgyTH_Yye4",
+    rating: "IMDb 6.9 • RT 58%",
+    budget: "$15 million",
+    boxOffice: "$357 million",
+    status: "Super Hit",
+    review: "Maverick ki pehli udaan.",
+  },
+  {
+    id: "the-color-of-money-1986",
+    title: "The Color of Money (1986)",
+    year: "1986",
+    genre: "Drama, Sport",
+    poster: "",
+    wiki: "The_Color_of_Money",
+    trailerId: "ihs6b6K2N0M",
+    rating: "IMDb 7.0 • RT 88%",
+    budget: "$13 million",
+    boxOffice: "$52 million",
+    status: "Hit",
+    review: "Paul Newman ke saath pool ka game.",
+  },
+  {
+    id: "cocktail-1988",
+    title: "Cocktail (1988)",
+    year: "1988",
+    genre: "Drama, Romance",
+    poster: "",
+    wiki: "Cocktail_(1988_film)",
+    trailerId: "xV7OFp9pQ6U",
+    rating: "IMDb 5.9 • RT 8%",
+    budget: "$20 million",
+    boxOffice: "$78 million",
+    status: "Hit",
+    review: "Bartender bana Tom, romance aur drama.",
+  },
+  {
+    id: "rain-man-1988",
+    title: "Rain Man (1988)",
+    year: "1988",
+    genre: "Drama",
+    poster: "",
+    wiki: "Rain_Man",
+    trailerId: "mlNwKchAp4o",
+    rating: "IMDb 8.0 • RT 89%",
+    budget: "$25 million",
+    boxOffice: "$354 million",
+    status: "Blockbuster Hit",
+    review: "Dustin Hoffman ke saath Oscar winning movie.",
+  },
+  {
+    id: "born-on-the-fourth-of-july-1989",
+    title: "Born on the Fourth of July (1989)",
+    year: "1989",
+    genre: "Drama, War",
+    poster: "",
+    wiki: "Born_on_the_Fourth_of_July_(film)",
+    trailerId: "vLAhV0vV0Xg",
+    rating: "IMDb 7.2 • RT 90%",
+    budget: "$14 million",
+    boxOffice: "$161 million",
+    status: "Super Hit",
+    review: "Vietnam war hero ki kahani, Tom ko Oscar nomination mila.",
+  },
+  {
+    id: "days-of-thunder-1990",
+    title: "Days of Thunder (1990)",
+    year: "1990",
+    genre: "Action, Drama",
+    poster: "",
+    wiki: "Days_of_Thunder",
+    trailerId: "zV0V0V0X0E",
+    rating: "IMDb 6.0 • RT 38%",
+    budget: "$60 million",
+    boxOffice: "$157 million",
+    status: "Hit",
+    review: "NASCAR racing wali movie, Top Gun wali team ke saath.",
+  },
+  {
+    id: "far-and-away-1992",
+    title: "Far and Away (1992)",
+    year: "1992",
+    genre: "Drama, Romance",
+    poster: "",
+    wiki: "Far_and_Away",
+    trailerId: "vQV0V0X0E",
+    rating: "IMDb 6.5 • RT 50%",
+    budget: "$60 million",
+    boxOffice: "$137 million",
+    status: "Average",
+    review: "Nicole Kidman ke saath Ireland se America ka safar.",
+  },
+  {
+    id: "a-few-good-men-1992",
+    title: "A Few Good Men (1992)",
+    year: "1992",
+    genre: "Drama, Thriller",
+    poster: "",
+    wiki: "A_Few_Good_Men",
+    trailerId: "9HhZzZzZzZz",
+    rating: "IMDb 7.7 • RT 84%",
+    budget: "$40 million",
+    boxOffice: "$243 million",
+    status: "Super Hit",
+    review: "You can't handle the truth! Jack Nicholson ke saath courtroom drama.",
+  },
+  {
+    id: "the-firm-1993",
+    title: "The Firm (1993)",
+    year: "1993",
+    genre: "Thriller, Drama",
+    poster: "",
+    wiki: "The_Firm_(1993_film)",
+    trailerId: "x0V0X0E",
+    rating: "IMDb 6.8 • RT 76%",
+    budget: "$42 million",
+    boxOffice: "$270 million",
+    status: "Super Hit",
+    review: "Lawyer ki kahani jo mafia firm me phans jata hai.",
+  },
+  {
+    id: "interview-with-the-vampire-1994",
+    title: "Interview with the Vampire (1994)",
+    year: "1994",
+    genre: "Horror, Drama",
+    poster: "",
+    wiki: "Interview_with_the_Vampire_(film)",
+    trailerId: "6yZzZzZzZz",
+    rating: "IMDb 7.5 • RT 62%",
+    budget: "$60 million",
+    boxOffice: "$223 million",
+    status: "Super Hit",
+    review: "Tom vampire Lestat bana, Brad Pitt ke saath.",
+  },
+  {
+    id: "jerry-maguire-1996",
+    title: "Jerry Maguire (1996)",
+    year: "1996",
+    genre: "Drama, Romance",
+    poster: "",
+    wiki: "Jerry_Maguire",
+    trailerId: "YjohBXAn7Xk",
+    rating: "IMDb 7.3 • RT 84%",
+    budget: "$50 million",
+    boxOffice: "$273 million",
+    status: "Super Hit",
+    review: "Show me the money! Tom ka Oscar nominated role.",
+  },
+  {
+    id: "eyes-wide-shut-1999",
+    title: "Eyes Wide Shut (1999)",
+    year: "1999",
+    genre: "Drama, Thriller",
+    poster: "",
+    wiki: "Eyes_Wide_Shut",
+    trailerId: "xZzZzZzZz",
+    rating: "IMDb 7.4 • RT 76%",
+    budget: "$65 million",
+    boxOffice: "$162 million",
+    status: "Hit",
+    review: "Stanley Kubrick ki akhri movie, Nicole Kidman ke saath.",
+  },
+  {
+    id: "magnolia-1999",
+    title: "Magnolia (1999)",
+    year: "1999",
+    genre: "Drama",
+    poster: "",
+    wiki: "Magnolia_(film)",
+    trailerId: "QzZzZzZz",
+    rating: "IMDb 8.0 • RT 82%",
+    budget: "$37 million",
+    boxOffice: "$48 million",
+    status: "Hit",
+    review: "Tom ko is movie pe Oscar nomination mila tha.",
+  },
+  {
+    id: "vanilla-sky-2001",
+    title: "Vanilla Sky (2001)",
+    year: "2001",
+    genre: "Romance, Sci-Fi",
+    poster: "",
+    wiki: "Vanilla_Sky",
+    trailerId: "kq2V0X0E",
+    rating: "IMDb 6.9 • RT 42%",
+    budget: "$68 million",
+    boxOffice: "$203 million",
+    status: "Hit",
+    review: "Penelope Cruz ke saath psychological thriller.",
+  },
+  {
+    id: "minority-report-2002",
+    title: "Minority Report (2002)",
+    year: "2002",
+    genre: "Sci-Fi, Thriller",
+    poster: "",
+    wiki: "Minority_Report_(film)",
+    trailerId: "aGWQYgZZEEg",
+    rating: "IMDb 7.6 • RT 89%",
+    budget: "$102 million",
+    boxOffice: "$358 million",
+    status: "Super Hit",
+    review: "Future me crime rokne ka system.",
+  },
+  {
+    id: "the-last-samurai-2003",
+    title: "The Last Samurai (2003)",
+    year: "2003",
+    genre: "Action, Drama",
+    poster: "",
+    wiki: "The_Last_Samurai",
+    trailerId: "a0AtR0Qklq4",
+    rating: "IMDb 7.8 • RT 66%",
+    budget: "$140 million",
+    boxOffice: "$456 million",
+    status: "Super Hit",
+    review: "Samurai ki duniya me Tom.",
+  },
+  {
+    id: "collateral-2004",
+    title: "Collateral (2004)",
+    year: "2004",
+    genre: "Crime, Thriller",
+    poster: "",
+    wiki: "Collateral_(film)",
+    trailerId: "1TDP1yQ8c5o",
+    rating: "IMDb 7.5 • RT 86%",
+    budget: "$65 million",
+    boxOffice: "$220 million",
+    status: "Hit",
+    review: "Tom villain bana.",
+  },
+  {
+    id: "war-of-the-worlds-2005",
+    title: "War of the Worlds (2005)",
+    year: "2005",
+    genre: "Sci-Fi, Thriller",
+    poster: "",
+    wiki: "War_of_the_Worlds_(2005_film)",
+    trailerId: "5lP06p4zqZs",
+    rating: "IMDb 6.5 • RT 75%",
+    budget: "$132 million",
+    boxOffice: "$603 million",
+    status: "Blockbuster",
+    review: "Aliens ka hamla.",
+  },
+  {
+    id: "lions-for-lambs-2007",
+    title: "Lions for Lambs (2007)",
+    year: "2007",
+    genre: "Drama, War",
+    poster: "",
+    wiki: "Lions_for_Lambs",
+    trailerId: "QzZzZzZz",
+    rating: "IMDb 6.2 • RT 27%",
+    budget: "$35 million",
+    boxOffice: "$63 million",
+    status: "Flop",
+    review: "Robert Redford aur Meryl Streep ke saath war drama.",
+  },
+  {
+    id: "tropic-thunder-2008",
+    title: "Tropic Thunder (2008)",
+    year: "2008",
+    genre: "Comedy, Action",
+    poster: "",
+    wiki: "Tropic_Thunder",
+    trailerId: "T0Y0ZqV0X0E",
+    rating: "IMDb 7.0 • RT 82%",
+    budget: "$92 million",
+    boxOffice: "$195 million",
+    status: "Hit",
+    review: "Tom ka funny cameo Les Grossman ke roop me, ganja aur mota.",
+  },
+  {
+    id: "valkyrie-2008",
+    title: "Valkyrie (2008)",
+    year: "2008",
+    genre: "War, Thriller",
+    poster: "",
+    wiki: "Valkyrie_(film)",
+    trailerId: "vS3_72Gb",
+    rating: "IMDb 7.0 • RT 62%",
+    budget: "$75 million",
+    boxOffice: "$200 million",
+    status: "Hit",
+    review: "Hitler ko marne ka plan, German officer bana Tom.",
+  },
+  {
+    id: "knight-and-day-2010",
+    title: "Knight and Day (2010)",
+    year: "2010",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "Knight_and_Day",
+    trailerId: "T0Y0ZqV0X0E",
+    rating: "IMDb 6.3 • RT 52%",
+    budget: "$117 million",
+    boxOffice: "$261 million",
+    status: "Hit",
+    review: "Cameron Diaz ke saath comedy action.",
+  },
+  {
+    id: "rock-of-ages-2012",
+    title: "Rock of Ages (2012)",
+    year: "2012",
+    genre: "Musical, Comedy",
+    poster: "",
+    wiki: "Rock_of_Ages_(2012_film)",
+    trailerId: "QzZzZz",
+    rating: "IMDb 5.9 • RT 43%",
+    budget: "$75 million",
+    boxOffice: "$59 million",
+    status: "Flop",
+    review: "Tom rockstar Stacee Jaxx bana, gaane gaaye.",
+  },
+  {
+    id: "jack-reacher-2012",
+    title: "Jack Reacher (2012)",
+    year: "2012",
+    genre: "Action, Thriller",
+    poster: "",
+    wiki: "Jack_Reacher_(film)",
+    trailerId: "aRwrdbcAH2s",
+    rating: "IMDb 7.0 • RT 63%",
+    budget: "$60 million",
+    boxOffice: "$218 million",
+    status: "Hit",
+    review: "Ex-Army investigator ka action.",
+  },
+  {
+    id: "oblivion-2013",
+    title: "Oblivion (2013)",
+    year: "2013",
+    genre: "Sci-Fi, Action",
+    poster: "",
+    wiki: "Oblivion_(2013_film)",
+    trailerId: "IBVk-1vLLOo",
+    rating: "IMDb 7.0 • RT 54%",
+    budget: "$120 million",
+    boxOffice: "$286 million",
+    status: "Hit",
+    review: "Future Earth, akela technician.",
+  },
+  {
+    id: "edge-of-tomorrow-2014",
+    title: "Edge of Tomorrow (2014)",
+    year: "2014",
+    genre: "Sci-Fi, Action",
+    poster: "",
+    wiki: "Edge_of_Tomorrow",
+    trailerId: "vw61gCe2oqI",
+    rating: "IMDb 7.9 • RT 91%",
+    budget: "$178 million",
+    boxOffice: "$370 million",
+    status: "Hit",
+    review: "Live Die Repeat, best time loop sci-fi.",
+  },
+  {
+    id: "jack-reacher-never-go-back-2016",
+    title: "Jack Reacher: Never Go Back (2016)",
+    year: "2016",
+    genre: "Action, Thriller",
+    poster: "",
+    wiki: "Jack_Reacher:_Never_Go_Back",
+    trailerId: "aRwrdbcAH2s",
+    rating: "IMDb 6.1 • RT 38%",
+    budget: "$60 million",
+    boxOffice: "$162 million",
+    status: "Average",
+    review: "Jack Reacher wapas, apni team ko bachana hai.",
+  },
+  {
+    id: "the-mummy-2017",
+    title: "The Mummy (2017)",
+    year: "2017",
+    genre: "Action, Fantasy",
+    poster: "",
+    wiki: "The_Mummy_(2017_film)",
+    trailerId: "IjHgzkQM2S4",
+    rating: "IMDb 5.4 • RT 15%",
+    budget: "$125 million",
+    boxOffice: "$409 million",
+    status: "Average",
+    review: "Dark Universe ki shuruat jo flop ho gayi.",
+  },
+  {
+    id: "american-made-2017",
+    title: "American Made (2017)",
+    year: "2017",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "American_Made_(film)",
+    trailerId: "AEBIJRAkujI",
+    rating: "IMDb 7.1 • RT 85%",
+    budget: "$50 million",
+    boxOffice: "$134 million",
+    status: "Hit",
+    review: "Pilot jo CIA ke liye drugs smuggle karta hai, true story.",
+  },
+  {
+    id: "top-gun-maverick-2022",
+    title: "Top Gun: Maverick (2022)",
+    year: "2022",
+    genre: "Action, Drama",
+    poster: "",
+    wiki: "Top_Gun:_Maverick",
+    trailerId: "giXcoLahGrI",
+    rating: "IMDb 8.3 • RT 96%",
+    budget: "$170 million",
+    boxOffice: "$1.49 billion",
+    status: "All-Time Blockbuster",
+    review: "36 saal baad Maverick wapas.",
+  },
+    {
+    id: "chaplin-1992",
+    title: "Chaplin (1992)",
+    year: "1992",
+    genre: "Drama, Biography",
+    poster: "",
+    wiki: "Chaplin_(film)",
+    trailerId: "8c5Nq3E2_5k",
+    rating: "IMDb 7.5 • RT 60%",
+    budget: "$31 million",
+    boxOffice: "$9 million",
+    status: "Flop",
+    review: "Charlie Chaplin bana RDJ, Oscar nomination mila tha.",
+  },
+  {
+    id: "kiss-kiss-bang-bang-2005",
+    title: "Kiss Kiss Bang Bang (2005)",
+    year: "2005",
+    genre: "Comedy, Crime",
+    poster: "",
+    wiki: "Kiss_Kiss_Bang_Bang",
+    trailerId: "16pKzLe3J3w",
+    rating: "IMDb 7.5 • RT 86%",
+    budget: "$15 million",
+    boxOffice: "$15 million",
+    status: "Average",
+    review: "RDJ ka comeback movie, comedy crime best hai.",
+  },
+  {
+    id: "zodiac-2007",
+    title: "Zodiac (2007)",
+    year: "2007",
+    genre: "Crime, Thriller",
+    poster: "",
+    wiki: "Zodiac_(film)",
+    trailerId: "yNncHPlV2U8",
+    rating: "IMDb 7.7 • RT 90%",
+    budget: "$65 million",
+    boxOffice: "$84 million",
+    status: "Hit",
+    review: "Serial killer ko dhundna, RDJ journalist bana.",
+  },
+  {
+    id: "tropic-thunder-2008-rdj",
+    title: "Tropic Thunder (2008)",
+    year: "2008",
+    genre: "Comedy, Action",
+    poster: "",
+    wiki: "Tropic_Thunder",
+    trailerId: "A7CBKT1Up1I",
+    rating: "IMDb 7.0 • RT 82%",
+    budget: "$92 million",
+    boxOffice: "$195 million",
+    status: "Hit",
+    review: "RDJ ne kaala makeup kiya, Oscar nomination mila funny role pe.",
+  },
+  {
+    id: "sherlock-holmes-2009",
+    title: "Sherlock Holmes (2009)",
+    year: "2009",
+    genre: "Mystery, Action",
+    poster: "",
+    wiki: "Sherlock_Holmes_(2009_film)",
+    trailerId: "J7nJksXDBWc",
+    rating: "IMDb 7.6 • RT 70%",
+    budget: "$90 million",
+    boxOffice: "$524 million",
+    status: "Super Hit",
+    review: "RDJ Sherlock bana, Jude Law Watson.",
+  },
+  {
+    id: "due-date-2010",
+    title: "Due Date (2010)",
+    year: "2010",
+    genre: "Comedy",
+    poster: "",
+    wiki: "Due_Date",
+    trailerId: "1hPp2B2z2zQ",
+    rating: "IMDb 6.5 • RT 40%",
+    budget: "$65 million",
+    boxOffice: "$211 million",
+    status: "Hit",
+    review: "RDJ aur Zach ka road trip, full comedy.",
+  },
+  {
+    id: "sherlock-holmes-a-game-of-shadows-2011",
+    title: "Sherlock Holmes: A Game of Shadows (2011)",
+    year: "2011",
+    genre: "Mystery, Action",
+    poster: "",
+    wiki: "Sherlock_Holmes:_A_Game_of_Shadows",
+    trailerId: "l7R1a1R1x1Q",
+    rating: "IMDb 7.4 • RT 60%",
+    budget: "$125 million",
+    boxOffice: "$543 million",
+    status: "Super Hit",
+    review: "Sherlock vs Moriarty, last wala fight zabardast.",
+  },
+  {
+    id: "the-judge-2014",
+    title: "The Judge (2014)",
+    year: "2014",
+    genre: "Drama",
+    poster: "",
+    wiki: "The_Judge_(2014_film)",
+    trailerId: "ZBvK6niXn2g",
+    rating: "IMDb 7.4 • RT 49%",
+    budget: "$50 million",
+    boxOffice: "$84 million",
+    status: "Average",
+    review: "Baap aur bete ka court drama, emotional movie.",
+  },
+  {
+    id: "dolittle-2020",
+    title: "Dolittle (2020)",
+    year: "2020",
+    genre: "Adventure, Comedy",
+    poster: "",
+    wiki: "Dolittle_(film)",
+    trailerId: "FEf412bCu64",
+    rating: "IMDb 5.6 • RT 15%",
+    budget: "$175 million",
+    boxOffice: "$251 million",
+    status: "Flop",
+    review: "Janwaron se baat karne wala doctor.",
+  },
+  {
+    id: "oppenheimer-2023",
+    title: "Oppenheimer (2023)",
+    year: "2023",
+    genre: "Drama, History",
+    poster: "",
+    wiki: "Oppenheimer_(film)",
+    trailerId: "uYPbbksJxIg",
+    rating: "IMDb 8.3 • RT 93%",
+    budget: "$100 million",
+    boxOffice: "$960 million",
+    status: "All-Time Blockbuster",
+    review: "Lewis Strauss bana RDJ, Oscar jeeta is movie pe.",
+  },
+    {
+    id: "the-mummy-returns-2001",
+    title: "The Mummy Returns (2001)",
+    year: "2001",
+    genre: "Action, Fantasy",
+    poster: "",
+    wiki: "The_Mummy_Returns",
+    trailerId: "M5yqW0w0v0E",
+    rating: "IMDb 6.4 • RT 47%",
+    budget: "$98 million",
+    boxOffice: "$435 million",
+    status: "Super Hit",
+    review: "Scorpion King ke roop me pehli entry.",
+  },
+  {
+    id: "the-scorpion-king-2002",
+    title: "The Scorpion King (2002)",
+    year: "2002",
+    genre: "Action, Fantasy",
+    poster: "",
+    wiki: "The_Scorpion_King",
+    trailerId: "R1q0v0E",
+    rating: "IMDb 5.5 • RT 41%",
+    budget: "$60 million",
+    boxOffice: "$180 million",
+    status: "Hit",
+    review: "Rock ki pehli solo lead movie.",
+  },
+  {
+    id: "the-rundown-2003",
+    title: "The Rundown (2003)",
+    year: "2003",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "The_Rundown",
+    trailerId: "0q0v0E",
+    rating: "IMDb 6.7 • RT 71%",
+    budget: "$85 million",
+    boxOffice: "$80 million",
+    status: "Average",
+    review: "Jungle me action comedy, Sean William Scott ke saath.",
+  },
+  {
+    id: "walking-tall-2004",
+    title: "Walking Tall (2004)",
+    year: "2004",
+    genre: "Action",
+    poster: "",
+    wiki: "Walking_Tall_(2004_film)",
+    trailerId: "1q0v0E",
+    rating: "IMDb 6.2 • RT 26%",
+    budget: "$46 million",
+    boxOffice: "$57 million",
+    status: "Average",
+    review: "Sheriff bana Rock, gaon saaf karta hai.",
+  },
+  {
+    id: "gridiron-gang-2006",
+    title: "Gridiron Gang (2006)",
+    year: "2006",
+    genre: "Drama, Sport",
+    poster: "",
+    wiki: "Gridiron_Gang",
+    trailerId: "2q0v0E",
+    rating: "IMDb 6.9 • RT 43%",
+    budget: "$30 million",
+    boxOffice: "$41 million",
+    status: "Average",
+    review: "Jail ke bachon ko football coach banata hai.",
+  },
+  {
+    id: "get-smart-2008",
+    title: "Get Smart (2008)",
+    year: "2008",
+    genre: "Comedy, Action",
+    poster: "",
+    wiki: "Get_Smart_(film)",
+    trailerId: "3q0v0E",
+    rating: "IMDb 6.5 • RT 51%",
+    budget: "$80 million",
+    boxOffice: "$230 million",
+    status: "Hit",
+    review: "Agent 23 bana Rock, comedy spy movie.",
+  },
+  {
+    id: "race-to-witch-mountain-2009",
+    title: "Race to Witch Mountain (2009)",
+    year: "2009",
+    genre: "Sci-Fi, Adventure",
+    poster: "",
+    wiki: "Race_to_Witch_Mountain",
+    trailerId: "4q0v0E",
+    rating: "IMDb 5.6 • RT 42%",
+    budget: "$50 million",
+    boxOffice: "$106 million",
+    status: "Hit",
+    review: "Alien bachon ko bachana hai.",
+  },
+  {
+    id: "g-i-joe-retaliation-2013",
+    title: "G.I. Joe: Retaliation (2013)",
+    year: "2013",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "G.I._Joe:_Retaliation",
+    trailerId: "5q0v0E",
+    rating: "IMDb 5.8 • RT 29%",
+    budget: "$130 million",
+    boxOffice: "$375 million",
+    status: "Super Hit",
+    review: "Roadblock bana Rock, full action.",
+  },
+  {
+    id: "san-andreas-2015",
+    title: "San Andreas (2015)",
+    year: "2015",
+    genre: "Action, Thriller",
+    poster: "",
+    wiki: "San_Andreas_(film)",
+    trailerId: "10q0v0E",
+    rating: "IMDb 6.0 • RT 49%",
+    budget: "$110 million",
+    boxOffice: "$474 million",
+    status: "Super Hit",
+    review: "Earthquake se bachao, pilot bana Rock.",
+  },
+  {
+    id: "central-intelligence-2016",
+    title: "Central Intelligence (2016)",
+    year: "2016",
+    genre: "Comedy, Action",
+    poster: "",
+    wiki: "Central_Intelligence",
+    trailerId: "11q0v0E",
+    rating: "IMDb 6.3 • RT 71%",
+    budget: "$50 million",
+    boxOffice: "$216 million",
+    status: "Hit",
+    review: "Kevin Hart ke saath comedy spy.",
+  },
+  {
+    id: "moana-2016",
+    title: "Moana (2016)",
+    year: "2016",
+    genre: "Animation, Adventure",
+    poster: "",
+    wiki: "Moana_(2016_film)",
+    trailerId: "LKFuXETZUsI",
+    rating: "IMDb 7.6 • RT 95%",
+    budget: "$150 million",
+    boxOffice: "$682 million",
+    status: "Blockbuster",
+    review: "Maui ki awaz Rock ne di, You're Welcome song hit.",
+  },
+  {
+    id: "jumanji-welcome-to-the-jungle-2017",
+    title: "Jumanji: Welcome to the Jungle (2017)",
+    year: "2017",
+    genre: "Adventure, Comedy",
+    poster: "",
+    wiki: "Jumanji:_Welcome_to_the_Jungle",
+    trailerId: "2QKg2v0E",
+    rating: "IMDb 6.9 • RT 76%",
+    budget: "$90 million",
+    boxOffice: "$962 million",
+    status: "Blockbuster",
+    review: "Game me phans gaye, Dr. Smolder Bravestone bana Rock.",
+  },
+  {
+    id: "jumanji-the-next-level-2019",
+    title: "Jumanji: The Next Level (2019)",
+    year: "2019",
+    genre: "Adventure, Comedy",
+    poster: "",
+    wiki: "Jumanji:_The_Next_Level",
+    trailerId: "13q0v0E",
+    rating: "IMDb 6.7 • RT 71%",
+    budget: "$125 million",
+    boxOffice: "$800 million",
+    status: "Blockbuster",
+    review: "Jumanji ka part 2, aur bhi maza.",
+  },
+  {
+    id: "rampage-2018",
+    title: "Rampage (2018)",
+    year: "2018",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "Rampage_(2018_film)",
+    trailerId: "14q0v0E",
+    rating: "IMDb 6.1 • RT 51%",
+    budget: "$120 million",
+    boxOffice: "$428 million",
+    status: "Super Hit",
+    review: "Gorilla dost ke saath monsters se ladai.",
+  },
+  {
+    id: "skyscraper-2018",
+    title: "Skyscraper (2018)",
+    year: "2018",
+    genre: "Action, Thriller",
+    poster: "",
+    wiki: "Skyscraper_(2018_film)",
+    trailerId: "15q0v0E",
+    rating: "IMDb 5.8 • RT 48%",
+    budget: "$125 million",
+    boxOffice: "$304 million",
+    status: "Hit",
+    review: "Sabse unchi building me aag, family ko bachana hai.",
+  },
+  {
+    id: "jungle-cruise-2021",
+    title: "Jungle Cruise (2021)",
+    year: "2021",
+    genre: "Adventure, Comedy",
+    poster: "",
+    wiki: "Jungle_Cruise_(film)",
+    trailerId: "16q0v0E",
+    rating: "IMDb 6.6 • RT 62%",
+    budget: "$200 million",
+    boxOffice: "$220 million",
+    status: "Hit",
+    review: "Emily Blunt ke saath Amazon me adventure.",
+  },
+  {
+    id: "red-notice-2021",
+    title: "Red Notice (2021)",
+    year: "2021",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "Red_Notice_(film)",
+    trailerId: "17q0v0E",
+    rating: "IMDb 6.3 • RT 37%",
+    budget: "$200 million",
+    boxOffice: "$300 million",
+    status: "Super Hit",
+    review: "Netflix ki sabse mehngi movie, Ryan Reynolds aur Gal Gadot ke saath.",
+  },
+    {
+    id: "moana-live-action-2026",
+    title: "Moana (2026) Live Action",
+    year: "2026",
+    genre: "Adventure, Family",
+    poster: "",
+    wiki: "Moana_(2026_film)",
+    trailerId: "zQjHSoVCQLs",
+    rating: "IMDb Coming Soon • RT Coming Soon",
+    budget: "$250 million",
+    boxOffice: "Coming July 10, 2026",
+    status: "Upcoming Blockbuster",
+    review: "Rock real me Maui bana, pehli baar live action me.",
+  },
+    {
+    id: "dr-no-1962",
+    title: "Dr. No (1962)",
+    year: "1962",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Dr._No_(film)",
+    trailerId: "v0v0v0X0E",
+    rating: "IMDb 7.2 • RT 95%",
+    budget: "$1.1 million",
+    boxOffice: "$59 million",
+    status: "Super Hit",
+    review: "Pehli Bond movie, Sean Connery ki entry.",
+  },
+  {
+    id: "from-russia-with-love-1963",
+    title: "From Russia with Love (1963)",
+    year: "1963",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "From_Russia_with_Love_(film)",
+    trailerId: "1v0v0E",
+    rating: "IMDb 7.4 • RT 95%",
+    budget: "$2 million",
+    boxOffice: "$78 million",
+    status: "Super Hit",
+    review: "Cold War spy thriller, best Connery movie.",
+  },
+  {
+    id: "goldfinger-1964",
+    title: "Goldfinger (1964)",
+    year: "1964",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Goldfinger_(film)",
+    trailerId: "2v0v0E",
+    rating: "IMDb 7.7 • RT 99%",
+    budget: "$3 million",
+    boxOffice: "$124 million",
+    status: "Blockbuster",
+    review: "Sabse iconic Bond, Aston Martin aur Oddjob.",
+  },
+  {
+    id: "thunderball-1965",
+    title: "Thunderball (1965)",
+    year: "1965",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Thunderball_(film)",
+    trailerId: "3v0v0E",
+    rating: "IMDb 7.0 • RT 87%",
+    budget: "$9 million",
+    boxOffice: "$141 million",
+    status: "Blockbuster",
+    review: "Pani ke andar action, nukes chori.",
+  },
+  {
+    id: "you-only-live-twice-1967",
+    title: "You Only Live Twice (1967)",
+    year: "1967",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "You_Only_Live_Twice_(film)",
+    trailerId: "4v0v0E",
+    rating: "IMDb 6.9 • RT 73%",
+    budget: "$9.5 million",
+    boxOffice: "$111 million",
+    status: "Super Hit",
+    review: "Japan me Bond, Blofeld ki pehli face reveal.",
+  },
+  {
+    id: "on-her-majestys-secret-service-1969",
+    title: "On Her Majesty's Secret Service (1969)",
+    year: "1969",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "On_Her_Majesty%27s_Secret_Service_(film)",
+    trailerId: "5v0v0E",
+    rating: "IMDb 6.8 • RT 81%",
+    budget: "$8 million",
+    boxOffice: "$82 million",
+    status: "Hit",
+    review: "George Lazenby ka ek hi Bond, emotional ending.",
+  },
+  {
+    id: "diamonds-are-forever-1971",
+    title: "Diamonds Are Forever (1971)",
+    year: "1971",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Diamonds_Are_Forever_(film)",
+    trailerId: "6v0v0E",
+    rating: "IMDb 6.5 • RT 64%",
+    budget: "$7.2 million",
+    boxOffice: "$116 million",
+    status: "Super Hit",
+    review: "Connery wapas, Las Vegas me diamonds smuggling.",
+  },
+  {
+    id: "live-and-let-die-1973",
+    title: "Live and Let Die (1973)",
+    year: "1973",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Live_and_Let_Die_(film)",
+    trailerId: "7v0v0E",
+    rating: "IMDb 6.7 • RT 67%",
+    budget: "$7 million",
+    boxOffice: "$161 million",
+    status: "Super Hit",
+    review: "Roger Moore ki pehli Bond entry.",
+  },
+  {
+    id: "the-man-with-the-golden-gun-1974",
+    title: "The Man with the Golden Gun (1974)",
+    year: "1974",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "The_Man_with_the_Golden_Gun_(film)",
+    trailerId: "8v0v0E",
+    rating: "IMDb 6.7 • RT 40%",
+    budget: "$7 million",
+    boxOffice: "$97 million",
+    status: "Hit",
+    review: "Scaramanga ka golden gun wala villain.",
+  },
+  {
+    id: "the-spy-who-loved-me-1977",
+    title: "The Spy Who Loved Me (1977)",
+    year: "1977",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "The_Spy_Who_Loved_Me_(film)",
+    trailerId: "9v0v0E",
+    rating: "IMDb 7.0 • RT 81%",
+    budget: "$14 million",
+    boxOffice: "$185 million",
+    status: "Blockbuster",
+    review: "Best Moore movie, Jaws villain ki entry.",
+  },
+  {
+    id: "moonraker-1979",
+    title: "Moonraker (1979)",
+    year: "1979",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "Moonraker_(film)",
+    trailerId: "10v0v0E",
+    rating: "IMDb 6.2 • RT 60%",
+    budget: "$34 million",
+    boxOffice: "$210 million",
+    status: "Blockbuster",
+    review: "Bond space me, Star Wars ke chakkar me bani.",
+  },
+  {
+    id: "for-your-eyes-only-1981",
+    title: "For Your Eyes Only (1981)",
+    year: "1981",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "For_Your_Eyes_Only_(film)",
+    trailerId: "11v0v0E",
+    rating: "IMDb 6.7 • RT 73%",
+    budget: "$28 million",
+    boxOffice: "$195 million",
+    status: "Super Hit",
+    review: "Serious Bond, car chase zabardast.",
+  },
+  {
+    id: "octopussy-1983",
+    title: "Octopussy (1983)",
+    year: "1983",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Octopussy",
+    trailerId: "12v0v0E",
+    rating: "IMDb 6.5 • RT 42%",
+    budget: "$27.5 million",
+    boxOffice: "$187 million",
+    status: "Super Hit",
+    review: "India me shoot hui Bond, circus wala scene.",
+  },
+  {
+    id: "a-view-to-a-kill-1985",
+    title: "A View to a Kill (1985)",
+    year: "1985",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "A_View_to_a_Kill",
+    trailerId: "13v0v0E",
+    rating: "IMDb 6.3 • RT 37%",
+    budget: "$30 million",
+    boxOffice: "$152 million",
+    status: "Hit",
+    review: "Roger Moore ki akhri Bond movie.",
+  },
+  {
+    id: "the-living-daylights-1987",
+    title: "The Living Daylights (1987)",
+    year: "1987",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "The_Living_Daylights",
+    trailerId: "14v0v0E",
+    rating: "IMDb 6.7 • RT 73%",
+    budget: "$40 million",
+    boxOffice: "$191 million",
+    status: "Super Hit",
+    review: "Timothy Dalton ki pehli entry, serious Bond.",
+  },
+  {
+    id: "licence-to-kill-1989",
+    title: "Licence to Kill (1989)",
+    year: "1989",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Licence_to_Kill",
+    trailerId: "15v0v0E",
+    rating: "IMDb 6.5 • RT 79%",
+    budget: "$32 million",
+    boxOffice: "$156 million",
+    status: "Hit",
+    review: "Sabse violent Bond, revenge story.",
+  },
+  {
+    id: "goldeneye-1995",
+    title: "GoldenEye (1995)",
+    year: "1995",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "GoldenEye",
+    trailerId: "16v0v0E",
+    rating: "IMDb 7.2 • RT 80%",
+    budget: "$60 million",
+    boxOffice: "$352 million",
+    status: "Blockbuster",
+    review: "Pierce Brosnan ki entry, N64 game bhi famous.",
+  },
+  {
+    id: "tomorrow-never-dies-1997",
+    title: "Tomorrow Never Dies (1997)",
+    year: "1997",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Tomorrow_Never_Dies",
+    trailerId: "17v0v0E",
+    rating: "IMDb 6.5 • RT 57%",
+    budget: "$110 million",
+    boxOffice: "$333 million",
+    status: "Super Hit",
+    review: "Media mogul villain, Michelle Yeoh ke saath.",
+  },
+  {
+    id: "the-world-is-not-enough-1999",
+    title: "The World Is Not Enough (1999)",
+    year: "1999",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "The_World_Is_Not_Enough",
+    trailerId: "18v0v0E",
+    rating: "IMDb 6.3 • RT 51%",
+    budget: "$135 million",
+    boxOffice: "$361 million",
+    status: "Super Hit",
+    review: "Sophie Marceau villain, oil pipeline story.",
+  },
+  {
+    id: "die-another-day-2002",
+    title: "Die Another Day (2002)",
+    year: "2002",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Die_Another_Day",
+    trailerId: "19v0v0E",
+    rating: "IMDb 6.1 • RT 56%",
+    budget: "$142 million",
+    boxOffice: "$431 million",
+    status: "Blockbuster",
+    review: "Brosnan ki akhri, invisible car wali Bond.",
+  },
+  {
+    id: "casino-royale-2006",
+    title: "Casino Royale (2006)",
+    year: "2006",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Casino_Royale_(2006_film)",
+    trailerId: "20v0v0E",
+    rating: "IMDb 8.0 • RT 94%",
+    budget: "$150 million",
+    boxOffice: "$616 million",
+    status: "Blockbuster",
+    review: "Daniel Craig ki pehli, sabse best modern Bond.",
+  },
+  {
+    id: "quantum-of-solace-2008",
+    title: "Quantum of Solace (2008)",
+    year: "2008",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Quantum_of_Solace",
+    trailerId: "21v0v0E",
+    rating: "IMDb 6.5 • RT 64%",
+    budget: "$200 million",
+    boxOffice: "$589 million",
+    status: "Blockbuster",
+    review: "Casino Royale ka direct sequel.",
+  },
+  {
+    id: "skyfall-2012",
+    title: "Skyfall (2012)",
+    year: "2012",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Skyfall",
+    trailerId: "22v0v0E",
+    rating: "IMDb 7.8 • RT 92%",
+    budget: "$200 million",
+    boxOffice: "$1.1 billion",
+    status: "All-Time Blockbuster",
+    review: "Best Bond ever, Javier Bardem villain, Adele song.",
+  },
+  {
+    id: "spectre-2015",
+    title: "Spectre (2015)",
+    year: "2015",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "Spectre_(2015_film)",
+    trailerId: "23v0v0E",
+    rating: "IMDb 6.8 • RT 63%",
+    budget: "$245 million",
+    boxOffice: "$880 million",
+    status: "Blockbuster",
+    review: "Blofeld wapas, Craig aur Lea Seydoux.",
+  },
+  {
+    id: "no-time-to-die-2021",
+    title: "No Time to Die (2021)",
+    year: "2021",
+    genre: "Action, Spy",
+    poster: "",
+    wiki: "No_Time_to_Die",
+    trailerId: "24v0v0E",
+    rating: "IMDb 7.3 • RT 83%",
+    budget: "$250 million",
+    boxOffice: "$774 million",
+    status: "Blockbuster",
+    review: "Daniel Craig ki akhri Bond, emotional ending.",
+  },
+    {
+    id: "varsity-blues-1999",
+    title: "Varsity Blues (1999)",
+    year: "1999",
+    genre: "Drama, Sport",
+    poster: "",
+    wiki: "Varsity_Blues",
+    trailerId: "v0v0E",
+    rating: "IMDb 5.9 • RT 40%",
+    budget: "$16 million",
+    boxOffice: "$54 million",
+    status: "Hit",
+    review: "Football wali pehli hit, James Van Der Beek ke saath.",
+  },
+  {
+    id: "shes-all-that-1999",
+    title: "She's All That (1999)",
+    year: "1999",
+    genre: "Romance, Comedy",
+    poster: "",
+    wiki: "She%27s_All_That",
+    trailerId: "1v0v0E",
+    rating: "IMDb 5.9 • RT 41%",
+    budget: "$10 million",
+    boxOffice: "$103 million",
+    status: "Super Hit",
+    review: "Dean Sampson bana, high school romance.",
+  },
+  {
+    id: "the-skulls-2000",
+    title: "The Skulls (2000)",
+    year: "2000",
+    genre: "Thriller",
+    poster: "",
+    wiki: "The_Skulls_(film)",
+    trailerId: "2v0v0E",
+    rating: "IMDb 5.6 • RT 9%",
+    budget: "$15 million",
+    boxOffice: "$50 million",
+    status: "Hit",
+    review: "Secret society wali thriller.",
+  },
+  {
+    id: "joy-ride-2001",
+    title: "Joy Ride (2001)",
+    year: "2001",
+    genre: "Thriller, Horror",
+    poster: "",
+    wiki: "Joy_Ride_(2001_film)",
+    trailerId: "3v0v0E",
+    rating: "IMDb 6.5 • RT 74%",
+    budget: "$23 million",
+    boxOffice: "$36 million",
+    status: "Average",
+    review: "Highway thriller, Rusty Nail truck driver se bachna hai.",
+  },
+  {
+    id: "timeline-2003",
+    title: "Timeline (2003)",
+    year: "2003",
+    genre: "Sci-Fi, Adventure",
+    poster: "",
+    wiki: "Timeline_(2003_film)",
+    trailerId: "4v0v0E",
+    rating: "IMDb 5.6 • RT 11%",
+    budget: "$80 million",
+    boxOffice: "$43 million",
+    status: "Flop",
+    review: "Time travel karke 14th century me chale gaye.",
+  },
+  {
+    id: "into-the-blue-2005",
+    title: "Into the Blue (2005)",
+    year: "2005",
+    genre: "Action, Thriller",
+    poster: "",
+    wiki: "Into_the_Blue_(film)",
+    trailerId: "5v0v0E",
+    rating: "IMDb 5.8 • RT 21%",
+    budget: "$50 million",
+    boxOffice: "$44 million",
+    status: "Average",
+    review: "Jessica Alba ke saath samundar me khazana aur drugs.",
+  },
+  {
+    id: "eight-below-2006",
+    title: "Eight Below (2006)",
+    year: "2006",
+    genre: "Adventure, Family",
+    poster: "",
+    wiki: "Eight_Below",
+    trailerId: "6v0v0E",
+    rating: "IMDb 7.3 • RT 72%",
+    budget: "$40 million",
+    boxOffice: "$120 million",
+    status: "Super Hit",
+    review: "Antarctica me 8 husky dogs ko bachana hai, emotional.",
+  },
+  {
+    id: "running-scared-2006",
+    title: "Running Scared (2006)",
+    year: "2006",
+    genre: "Crime, Action",
+    poster: "",
+    wiki: "Running_Scared_(2006_film)",
+    trailerId: "7v0v0E",
+    rating: "IMDb 7.4 • RT 41%",
+    budget: "$17 million",
+    boxOffice: "$9 million",
+    status: "Flop",
+    review: "Gangster thriller, gun dhundna hai, full dark.",
+  },
+  {
+    id: "takers-2010",
+    title: "Takers (2010)",
+    year: "2010",
+    genre: "Crime, Action",
+    poster: "",
+    wiki: "Takers_(film)",
+    trailerId: "8v0v0E",
+    rating: "IMDb 6.1 • RT 28%",
+    budget: "$32 million",
+    boxOffice: "$69 million",
+    status: "Hit",
+    review: "Bank robbery team, Chris Brown aur T.I ke saath.",
+  },
+  {
+    id: "hours-2013",
+    title: "Hours (2013)",
+    year: "2013",
+    genre: "Thriller, Drama",
+    poster: "",
+    wiki: "Hours_(film)",
+    trailerId: "9v0v0E",
+    rating: "IMDb 6.3 • RT 61%",
+    budget: "$4 million",
+    boxOffice: "$1 million",
+    status: "Flop",
+    review: "Hurricane Katrina me hospital me bache ko bachana hai, solo performance.",
+  },
+  {
+    id: "brick-mansions-2014",
+    title: "Brick Mansions (2014)",
+    year: "2014",
+    genre: "Action",
+    poster: "",
+    wiki: "Brick_Mansions",
+    trailerId: "10v0v0E",
+    rating: "IMDb 5.7 • RT 25%",
+    budget: "$28 million",
+    boxOffice: "$68 million",
+    status: "Hit",
+    review: "Paul ki akhri puri action movie, French District B13 ka remake.",
+  },
+    {
+    id: "tenet-2020",
+    title: "Tenet (2020)",
+    year: "2020",
+    genre: "Sci-Fi, Action, Thriller",
+    poster: "",
+    wiki: "Tenet_(film)",
+    trailerId: "L3pk_TBKIU4",
+    rating: "IMDb 7.3 • RT 69%",
+    budget: "$200 million",
+    boxOffice: "$365 million",
+    status: "Hit",
+    review: "Christopher Nolan ki time inversion wali sci-fi, ulta time.",
+  },
+  {
+    id: "bad-boys-for-life-2020",
+    title: "Bad Boys for Life (2020)",
+    year: "2020",
+    genre: "Action, Comedy, Crime",
+    poster: "",
+    wiki: "Bad_Boys_for_Life",
+    trailerId: "jKCj3A_qxp0",
+    rating: "IMDb 6.5 • RT 76%",
+    budget: "$90 million",
+    boxOffice: "$426 million",
+    status: "Blockbuster",
+    review: "Will Smith aur Martin Lawrence ki 17 saal baad wapsi.",
+  },
+  {
+    id: "birds-of-prey-2020",
+    title: "Birds of Prey (2020)",
+    year: "2020",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "Birds_of_Prey_(2020_film)",
+    trailerId: "k2q22L2D-X8",
+    rating: "IMDb 6.0 • RT 79%",
+    budget: "$84 million",
+    boxOffice: "$201 million",
+    status: "Average",
+    review: "Margot Robbie ki Harley Quinn solo movie.",
+  },
+  {
+    id: "sonic-the-hedgehog-2020",
+    title: "Sonic the Hedgehog (2020)",
+    year: "2020",
+    genre: "Adventure, Comedy",
+    poster: "",
+    wiki: "Sonic_the_Hedgehog_(film)",
+    trailerId: "szby7ZHLnkA",
+    rating: "IMDb 6.5 • RT 64%",
+    budget: "$85 million",
+    boxOffice: "$319 million",
+    status: "Super Hit",
+    review: "Game ka blue hedgehog, Jim Carrey villain.",
+  },
+  {
+    id: "the-invisible-man-2020",
+    title: "The Invisible Man (2020)",
+    year: "2020",
+    genre: "Horror, Sci-Fi, Thriller",
+    poster: "",
+    wiki: "The_Invisible_Man_(2020_film)",
+    trailerId: "WO_FJ4YkQ6A",
+    rating: "IMDb 7.1 • RT 91%",
+    budget: "$7 million",
+    boxOffice: "$144 million",
+    status: "Super Hit",
+    review: "Low budget horror lekin zabardast kamai.",
+  },
+  {
+    id: "onward-2020",
+    title: "Onward (2020)",
+    year: "2020",
+    genre: "Animation, Adventure",
+    poster: "",
+    wiki: "Onward_(film)",
+    trailerId: "gn5QmllRCn4",
+    rating: "IMDb 7.4 • RT 88%",
+    budget: "$175 million",
+    boxOffice: "$142 million",
+    status: "Flop",
+    review: "Pixar ki jadoo wali story, corona ki wajah se flop.",
+  },
+  {
+    id: "bloodshot-2020",
+    title: "Bloodshot (2020)",
+    year: "2020",
+    genre: "Action, Sci-Fi",
+    poster: "",
+    wiki: "Bloodshot_(film)",
+    trailerId: "vOUVVDWdXbo",
+    rating: "IMDb 5.7 • RT 32%",
+    budget: "$45 million",
+    boxOffice: "$37 million",
+    status: "Flop",
+    review: "Vin Diesel super soldier bana.",
+  },
+  {
+    id: "mulan-2020",
+    title: "Mulan (2020)",
+    year: "2020",
+    genre: "Action, Adventure",
+    poster: "",
+    wiki: "Mulan_(2020_film)",
+    trailerId: "KK8FHdFluOQ",
+    rating: "IMDb 5.7 • RT 72%",
+    budget: "$200 million",
+    boxOffice: "$70 million",
+    status: "Flop",
+    review: "Disney live action, corona me Disney+ pe gayi.",
+  },
+  {
+    id: "soul-2020",
+    title: "Soul (2020)",
+    year: "2020",
+    genre: "Animation, Drama",
+    poster: "",
+    wiki: "Soul_(2020_film)",
+    trailerId: "xOsLIi4FFr0",
+    rating: "IMDb 8.0 • RT 95%",
+    budget: "$150 million",
+    boxOffice: "$121 million",
+    status: "Hit",
+    review: "Pixar ka Oscar winner, rooh ki duniya.",
+  },
+  {
+    id: "extraction-2020",
+    title: "Extraction (2020)",
+    year: "2020",
+    genre: "Action, Thriller",
+    poster: "",
+    wiki: "Extraction_(2020_film)",
+    trailerId: "L6P3nI6VnlY",
+    rating: "IMDb 6.7 • RT 67%",
+    budget: "$65 million",
+    boxOffice: "$100M+ Netflix views",
+    status: "Super Hit",
+    review: "Chris Hemsworth ka Netflix blockbuster, Dhaka mission.",
+  },
+  {
+    id: "enola-holmes-2020",
+    title: "Enola Holmes (2020)",
+    year: "2020",
+    genre: "Mystery, Adventure",
+    poster: "",
+    wiki: "Enola_Holmes_(film)",
+    trailerId: "1d0Zf9sXlHk",
+    rating: "IMDb 6.6 • RT 91%",
+    budget: "$20 million",
+    boxOffice: "$80M+ Netflix views",
+    status: "Super Hit",
+    review: "Millie Bobby Brown Sherlock ki behen bani.",
+  },
+  {
+    id: "the-old-guard-2020",
+    title: "The Old Guard (2020)",
+    year: "2020",
+    genre: "Action, Fantasy",
+    poster: "",
+    wiki: "The_Old_Guard_(2020_film)",
+    trailerId: "aK-X2dHguug",
+    rating: "IMDb 6.6 • RT 80%",
+    budget: "$70 million",
+    boxOffice: "$100M+ Netflix views",
+    status: "Super Hit",
+    review: "Charlize Theron amar warrior bani.",
+  },
+  {
+    id: "tanhaji-2020-bollywood",
+    title: "Tanhaji: The Unsung Warrior (2020)",
+    year: "2020",
+    genre: "Action, Historical, Drama",
+    poster: "",
+    wiki: "Tanhaji",
+    trailerId: "cffAGIYTEHU",
+    rating: "IMDb 7.6 • RT 73%",
+    budget: "₹125 crore",
+    boxOffice: "₹367 crore",
+    status: "All-Time Blockbuster",
+    review: "Ajay Devgn ki sabse badi hit, Maratha warrior.",
+  },
+  {
+    id: "baaghi-3-2020",
+    title: "Baaghi 3 (2020)",
+    year: "2020",
+    genre: "Action, Thriller",
+    poster: "",
+    wiki: "Baaghi_3",
+    trailerId: "jxCRLe5mSCo",
+    rating: "IMDb 2.2 • RT 14%",
+    budget: "₹85 crore",
+    boxOffice: "₹137 crore",
+    status: "Hit",
+    review: "Tiger Shroff ka action, Syria wala mission.",
+  },
+  {
+    id: "street-dancer-3d-2020",
+    title: "Street Dancer 3D (2020)",
+    year: "2020",
+    genre: "Dance, Drama",
+    poster: "",
+    wiki: "Street_Dancer_3D",
+    trailerId: "4s8JlabahZg",
+    rating: "IMDb 4.7 • RT 24%",
+    budget: "₹70 crore",
+    boxOffice: "₹97 crore",
+    status: "Average",
+    review: "Varun Dhawan aur Shraddha ka dance battle.",
+  },
+  {
+    id: "shubh-mangal-zyada-saavdhan-2020",
+    title: "Shubh Mangal Zyada Saavdhan (2020)",
+    year: "2020",
+    genre: "Comedy, Romance",
+    poster: "",
+    wiki: "Shubh_Mangal_Zyada_Saavdhan",
+    trailerId: "YMy8S9DswWg",
+    rating: "IMDb 5.6 • RT 71%",
+    budget: "₹25 crore",
+    boxOffice: "₹86 crore",
+    status: "Hit",
+    review: "Ayushmann Khurrana gay love story, comedy.",
+  },
+  {
+    id: "malang-2020",
+    title: "Malang (2020)",
+    year: "2020",
+    genre: "Action, Thriller, Romance",
+    poster: "",
+    wiki: "Malang_(film)",
+    trailerId: "BH4rF7Bh4w4",
+    rating: "IMDb 6.5 • RT 50%",
+    budget: "₹50 crore",
+    boxOffice: "₹84 crore",
+    status: "Hit",
+    review: "Aditya Roy Kapur revenge story, Goa me.",
+  },
+  {
+    id: "chhapaak-2020",
+    title: "Chhapaak (2020)",
+    year: "2020",
+    genre: "Drama",
+    poster: "",
+    wiki: "Chhapaak",
+    trailerId: "h0fO1PBU0-g",
+    rating: "IMDb 5.2 • RT 88%",
+    budget: "₹35 crore",
+    boxOffice: "₹55 crore",
+    status: "Flop",
+    review: "Deepika Padukone acid survivor ki kahani.",
+  },
+  {
+    id: "love-aaj-kal-2020",
+    title: "Love Aaj Kal (2020)",
+    year: "2020",
+    genre: "Romance, Drama",
+    poster: "",
+    wiki: "Love_Aaj_Kal_(2020_film)",
+    trailerId: "Y8lKyuan6rs",
+    rating: "IMDb 5.2 • RT 18%",
+    budget: "₹50 crore",
+    boxOffice: "₹52 crore",
+    status: "Flop",
+    review: "Kartik Aaryan aur Sara Ali Khan wala remake.",
+  },
+  {
+    id: "angrezi-medium-2020",
+    title: "Angrezi Medium (2020)",
+    year: "2020",
+    genre: "Comedy, Drama",
+    poster: "",
+    wiki: "Angrezi_Medium",
+    trailerId: "sxzSL3dAxmo",
+    rating: "IMDb 7.0 • RT 53%",
+    budget: "₹36 crore",
+    boxOffice: "₹13 crore",
+    status: "Flop - Corona",
+    review: "Irrfan Khan ki akhri film, beti ko London bhejna.",
+  },
+  {
+    id: "laxmii-2020",
+    title: "Laxmii (2020)",
+    year: "2020",
+    genre: "Horror, Comedy",
+    poster: "",
+    wiki: "Laxmii",
+    trailerId: "x1s2G520BoU",
+    rating: "IMDb 3.7 • RT 12%",
+    budget: "₹80 crore",
+    boxOffice: "OTT Release",
+    status: "Flop",
+    review: "Akshay Kumar transgender bhoot, Kanchana remake.",
+  },
+  {
+    id: "dil-bechara-2020",
+    title: "Dil Bechara (2020)",
+    year: "2020",
+    genre: "Romance, Drama",
+    poster: "",
+    wiki: "Dil_Bechara",
+    trailerId: "GODAl9oVwdE",
+    rating: "IMDb 7.9 • RT 87%",
+    budget: "₹40 crore",
+    boxOffice: "OTT Release - Super Hit",
+    status: "Super Hit",
+    review: "Sushant Singh Rajput ki akhri movie, emotional.",
+  },
+// ===== TOLLYWOOD 2020 (Telugu) =====
+  {
+    id: "ala-vaikunthapurramuloo-2020",
+    title: "Ala Vaikunthapurramuloo (2020)",
+    year: "2020",
+    genre: "Action, Comedy, Drama",
+    poster: "",
+    wiki: "Ala_Vaikunthapurramuloo",
+    trailerId: "S2lV0q0u2K8",
+    rating: "IMDb 7.3 • RT 91%",
+    budget: "₹75 crore",
+    boxOffice: "₹262 crore",
+    status: "Blockbuster",
+    review: "Allu Arjun ki sabse badi hit 2020 me, Butta Bomma song.",
+  },
+  {
+    id: "sarileru-neekevvaru-2020",
+    title: "Sarileru Neekevvaru (2020)",
+    year: "2020",
+    genre: "Action, Comedy",
+    poster: "",
+    wiki: "Sarileru_Neekevvaru",
+    trailerId: "Gk0Y1Zk0X0o",
+    rating: "IMDb 5.8 • RT 45%",
+    budget: "₹75 crore",
+    boxOffice: "₹260 crore",
+    status: "Super Hit",
+    review: "Mahesh Babu army major wala mass movie.",
+  },
+  {
+    id: "bheeshma-2020-tollywood",
+    title: "Bheeshma (2020)",
+    year: "2020",
+    genre: "Romance, Comedy",
+    poster: "",
+    wiki: "Bheeshma_(2020_film)",
+    trailerId: "X0lV0q0u2K9",
+    rating: "IMDb 6.2 • RT 60%",
+    budget: "₹25 crore",
+    boxOffice: "₹50 crore",
+    status: "Hit",
+    review: "Nithiin single ladka organic farming comedy.",
+  },
+  {
+    id: "janu-2020-tollywood",
+    title: "Jaanu (2020)",
+    year: "2020",
+    genre: "Romance, Drama",
+    poster: "",
+    wiki: "Jaanu_(2020_film)",
+    trailerId: "X0lV0q0u2K10",
+    rating: "IMDb 7.0 • RT 70%",
+    budget: "₹20 crore",
+    boxOffice: "₹28 crore",
+    status: "Average",
+    review: "96 Tamil ka Telugu remake, Samantha.",
+  },
+  {
+    id: "v-2020-tollywood",
+    title: "V (2020)",
+    year: "2020",
+    genre: "Action, Thriller",
+    poster: "",
+    wiki: "V_(2020_film)",
+    trailerId: "X0lV0q0u2K11",
+    rating: "IMDb 6.5 • RT 40%",
+    budget: "₹45 crore",
+    boxOffice: "OTT Release Amazon",
+    status: "Average",
+    review: "Nani negative role me, cop vs killer.",
+  },
+  {
+    id: "nishabdham-2020",
+    title: "Nishabdham (2020)",
+    year: "2020",
+    genre: "Thriller, Horror",
+    poster: "",
+    wiki: "Nishabdham",
+    trailerId: "X0lV0q0u2K12",
+    rating: "IMDb 4.4 • RT 20%",
+    budget: "₹25 crore",
+    boxOffice: "OTT Release Amazon",
+    status: "Flop",
+    review: "Anushka Shetty mute artist thriller USA me.",
+  }
+  ];
+  ];
 
 /* ========== HELPERS ========== */
 const list=document.getElementById("movieList");
 
 function statusColor(s){
   if(s==="Flop") return "#e50914";
-  if(s==="Coming Soon"||s==="Most Awaited") return "#555";
+  if(s==="Coming Soon"||s==="Most Awaited"||s==="Upcoming Blockbuster"||s==="Upcoming") return "#555";
   if(s==="Average") return "#b8860b";
   return "#2e7d32";
 }
@@ -191,35 +3038,6 @@ function formatChatTime(ts){
   try{return ts.toDate().toLocaleString()}catch(e){return ""}
 }
 
-/* ========== BAD WORDS / LINK FILTER ========== */
-function normalizeText(t){
-  return t.toLowerCase()
-    .replace(/0/g,"o").replace(/1/g,"i").replace(/3/g,"e")
-    .replace(/4/g,"a").replace(/5/g,"s")
-    .replace(/@/g,"a").replace(/\$/g,"s")
-    .replace(/(.)\1+/g,"$1");
-}
-
-/* Yahan aur alfaaz jodne hon to comma laga kar likh dein */
-const BAD_WORDS=[
-  "fuck","shit","bitch","asshole","bastard","dick","pussy",
-  "slut","whore","cunt","nigger",
-  "madarchod","behenchod","bhenchod","chutiya","gandu",
-  "harami","haramzada","haramkhor","kutta","kutti","randi",
-  "lund","gaand","bhosdi","bhosdike","kamina","kanjar","mc","bc"
-].map(normalizeText);
-
-function isBlocked(text){
-  const n=normalizeText(text);
-  const words=n.split(/[^a-z]+/);
-  const squashed=n.replace(/[^a-z]/g,"");
-  const badWord=BAD_WORDS.some(w=>
-    words.includes(w)||(w.length>=5&&squashed.includes(w))
-  );
-  const hasLink=/(https?:\/\/|www\.)/i.test(text);
-  return badWord||hasLink;
-}
-
 /* ========== POSTER SYSTEM ========== */
 function placeholderPoster(title){
   return "https://placehold.co/500x750/292929/ffffff?text="+encodeURIComponent(title);
@@ -228,22 +3046,15 @@ function placeholderPoster(title){
 function getPosterSources(m){
   const s=[];
   if(m.poster) s.push(m.poster);
-
-  if(m.poster&&m.poster.includes("image.tmdb.org/t/p/w500/")){
+  if(m.poster && m.poster.includes("image.tmdb.org/t/p/w500/")){
     const p=m.poster.split("/w500/")[1];
     s.push("https://image.tmdb.org/t/p/w780/"+p);
     s.push("https://image.tmdb.org/t/p/original/"+p);
   }
-
-  const RAW="raw.githubusercontent.com/Hamzaa408/cineworld/main/";
-  const CDN="cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/";
-
-  if(m.poster&&m.poster.includes(RAW)){
-    s.push("https://"+CDN+m.poster.split(RAW)[1]);
-  }
-  if(m.poster&&m.poster.includes(CDN)){
-    s.push("https://"+RAW+m.poster.split(CDN)[1]);
-  }
+  const RAWP="raw.githubusercontent.com/Hamzaa408/cineworld/main/";
+  const CDNP="cdn.jsdelivr.net/gh/Hamzaa408/cineworld@main/";
+  if(m.poster && m.poster.includes(RAWP)) s.push("https://"+CDNP+m.poster.split(RAWP)[1]);
+  if(m.poster && m.poster.includes(CDNP)) s.push("https://"+RAWP+m.poster.split(CDNP)[1]);
   return [...new Set(s)];
 }
 
@@ -253,23 +3064,20 @@ async function getWikiPoster(wiki){
     if(!r.ok) return null;
     const d=await r.json();
     return (d.thumbnail&&d.thumbnail.source)||(d.originalimage&&d.originalimage.source)||null;
-  }catch(e){
-    return null;
-  }
+  }catch(e){return null}
 }
 
 function loadPoster(img,m){
   const sources=getPosterSources(m);
   let index=0;
   let wikiTried=false;
-
   async function tryNext(){
     if(index<sources.length){
       img.onerror=tryNext;
       img.src=sources[index++];
       return;
     }
-    if(m.wiki&&!wikiTried){
+    if(m.wiki && !wikiTried){
       wikiTried=true;
       const url=await getWikiPoster(m.wiki);
       if(url){
@@ -281,7 +3089,6 @@ function loadPoster(img,m){
     img.onerror=null;
     img.src=placeholderPoster(m.title);
   }
-
   tryNext();
 }
 
@@ -313,10 +3120,7 @@ async function submitRating(movieId,val,container){
       const doc=await t.get(ref);
       if(doc.exists){
         const d=doc.data();
-        t.update(ref,{
-          total:(Number(d.total)||0)+val,
-          count:(Number(d.count)||0)+1
-        });
+        t.update(ref,{total:(Number(d.total)||0)+val,count:(Number(d.count)||0)+1});
       }else{
         t.set(ref,{total:val,count:1});
       }
@@ -335,12 +3139,10 @@ async function submitRating(movieId,val,container){
 /* ========== RENDER MOVIES ========== */
 function render(){
   list.innerHTML="";
-
   movies.forEach((m)=>{
     const card=document.createElement("div");
     card.className="card";
     card._m=m;
-
     card.innerHTML=`
       <div class="poster">
         <img src="${placeholderPoster(m.title)}" alt="${escapeHTML(m.title)}" loading="lazy" referrerpolicy="no-referrer">
@@ -417,63 +3219,78 @@ function closeReview(){
   document.getElementById("rm").style.display="none";
 }
 
-/* ========== FILTERS: SEARCH + INDUSTRY + YEAR ========== */
-const INDUSTRIES=["All","Hollywood","Bollywood","Tollywood"];
-let selInd="All",selYear="All";
+/* ========== TABS + MENU + SEARCH ========== */
+const tollywoodIds=["ala-vaikunthapurramuloo-2020","sarileru-neekevvaru-2020","bheeshma-2020-tollywood","janu-2020-tollywood","v-2020-tollywood","nishabdham-2020"];
+const upcomingStatus=["Coming Soon","Most Awaited","Upcoming Blockbuster","Upcoming"];
 
-function movieIndustry(m){return m.industry||"Hollywood"}
-
-function buildFilters(){
-  const box=document.getElementById("indBtns");
-  box.innerHTML="";
-  INDUSTRIES.forEach(name=>{
-    const b=document.createElement("button");
-    b.type="button";
-    b.className="chip"+(name===selInd?" active":"");
-    b.textContent=name;
-    b.onclick=()=>{
-      selInd=name;
-      box.querySelectorAll(".chip").forEach(c=>c.classList.toggle("active",c.textContent===name));
-      applyFilters();
-    };
-    box.appendChild(b);
-  });
-
-  const years=[...new Set(movies.map(m=>String(m.year)))].sort((a,b)=>b-a);
-  const sel=document.getElementById("yearSel");
-  sel.innerHTML='<option value="All">All Years</option>'+years.map(y=>`<option value="${y}">${y}</option>`).join("");
-  sel.onchange=()=>{selYear=sel.value;applyFilters()};
+function getIndustry(m){
+  if(m.industry) return m.industry;
+  if(tollywoodIds.includes(m.id)) return "tollywood";
+  if((m.budget||"").includes("₹")) return "bollywood";
+  return "hollywood";
 }
+function isUpcoming(m){
+  return m.upcoming===true || upcomingStatus.includes(m.status);
+}
+
+let curType="released", curIndustry="all", curYear="all";
+const yearSelect=document.getElementById("yearSelect");
 
 function applyFilters(){
   const text=document.getElementById("search").value.toLowerCase().trim();
   let shown=0;
   document.querySelectorAll(".card").forEach(card=>{
     const m=card._m;
-    const okText=!text||
-      m.title.toLowerCase().includes(text)||
-      m.genre.toLowerCase().includes(text)||
-      String(m.year).includes(text);
-    const okInd=selInd==="All"||movieIndustry(m)===selInd;
-    const okYear=selYear==="All"||String(m.year)===selYear;
-    const show=okText&&okInd&&okYear;
-    card.style.display=show?"":"none";
-    if(show) shown++;
+    if(!m) return;
+    const ok=
+      ((curType==="upcoming")===isUpcoming(m)) &&
+      (curIndustry==="all"||getIndustry(m)===curIndustry) &&
+      (curType==="upcoming"||curYear==="all"||String(m.year)===curYear) &&
+      (!text||m.title.toLowerCase().includes(text)||m.genre.toLowerCase().includes(text)||String(m.year).includes(text));
+    card.style.display=ok?"":"none";
+    if(ok) shown++;
   });
-  document.getElementById("countText").textContent=shown+" movies";
-  let empty=document.getElementById("emptyMsg");
-  if(shown===0){
-    if(!empty){
-      empty=document.createElement("div");
-      empty.id="emptyMsg";
-      empty.className="empty";
-      empty.textContent="Koi movie nahi mili. Filter ya search badal kar dekhein.";
-      list.appendChild(empty);
-    }
-  }else if(empty){
-    empty.remove();
+  let msg=document.getElementById("emptyMsg");
+  if(!msg){
+    msg=document.createElement("div");
+    msg.id="emptyMsg";
+    msg.className="empty-msg";
+    msg.textContent="Koi movie nahi mili 😕";
+    list.appendChild(msg);
   }
+  msg.style.display=shown?"none":"block";
+  document.querySelector("h1").textContent=curType==="upcoming"?"Upcoming Movies":"Released Movies";
+  yearSelect.style.display=curType==="upcoming"?"none":"";
 }
+
+[...new Set(movies.map(m=>String(m.year)))].sort((a,b)=>b-a).forEach(y=>{
+  const o=document.createElement("option");
+  o.value=y;o.textContent=y;
+  yearSelect.appendChild(o);
+});
+yearSelect.addEventListener("change",function(){
+  curYear=this.value;
+  this.classList.toggle("active",curYear!=="all");
+  applyFilters();
+});
+
+document.querySelectorAll("#tabs button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll("#tabs button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    curType=b.dataset.type;
+    applyFilters();
+  });
+});
+
+document.querySelectorAll("#menu button").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll("#menu button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    curIndustry=b.dataset.ind;
+    applyFilters();
+  });
+});
 
 document.getElementById("search").addEventListener("input",applyFilters);
 
@@ -486,13 +3303,10 @@ function openComments(m){
   const box=document.getElementById("cmMessages");
   box.innerHTML='<div class="no-chat">Loading...</div>';
   document.getElementById("cm").style.display="flex";
-
   try{
     document.getElementById("cmName").value=localStorage.getItem("cineworld_chat_name")||"";
   }catch(e){}
-
   if(cmUnsub) cmUnsub();
-
   cmUnsub=db.collection("movieChats").doc(m.id).collection("messages")
     .orderBy("createdAt","asc")
     .limitToLast(100)
@@ -531,12 +3345,6 @@ document.getElementById("cmForm").addEventListener("submit",async(e)=>{
   const textEl=document.getElementById("cmText");
   const text=textEl.value.trim();
   if(!name||!text||!cmMovieId) return;
-
-  if(isBlocked(name+" "+text)){
-    alert("Aisi language ya links allowed nahi hain. Respectful comment likhein.");
-    return;
-  }
-
   const btn=document.getElementById("cmSend");
   btn.disabled=true;
   try{
@@ -577,37 +3385,30 @@ function loadChat(){
       const messages=[];
       snapshot.forEach(doc=>messages.push({id:doc.id,...doc.data()}));
       messages.reverse();
-      messages.forEach(message=>{
+      messages.forEach(m=>{
         const div=document.createElement("div");
         div.className="chat-message";
         div.innerHTML=`
-          <div class="chat-name">${escapeHTML(message.name||"Guest")}</div>
-          <div class="chat-text">${escapeHTML(message.text||"")}</div>
-          <div class="chat-time">${formatChatTime(message.createdAt)}</div>`;
+          <div class="chat-name">${escapeHTML(m.name||"Guest")}</div>
+          <div class="chat-text">${escapeHTML(m.text||"")}</div>
+          <div class="chat-time">${formatChatTime(m.createdAt)}</div>`;
         chatMessages.appendChild(div);
       });
       chatMessages.scrollTop=chatMessages.scrollHeight;
     },
-    error=>{
-      console.error("Chat error:",error);
-      chatMessages.innerHTML='<div class="no-chat">Chat abhi load nahi ho raha. Firebase Firestore check karein.</div>';
+    err=>{
+      console.error(err);
+      chatMessages.innerHTML='<div class="no-chat">Chat load nahi ho rahi. Firestore rules check karein.</div>';
     }
   );
 }
 
-chatForm.addEventListener("submit",async function(e){
+chatForm.addEventListener("submit",async(e)=>{
   e.preventDefault();
   const name=chatName.value.trim();
   const text=chatInput.value.trim();
   if(!name||!text) return;
-
-  if(isBlocked(name+" "+text)){
-    alert("Aisi language ya links allowed nahi hain. Respectful message likhein.");
-    return;
-  }
-
   chatSend.disabled=true;
-  chatSend.textContent="Sending...";
   try{
     await db.collection("chat").add({
       name:name,
@@ -616,22 +3417,16 @@ chatForm.addEventListener("submit",async function(e){
     });
     try{localStorage.setItem("cineworld_chat_name",name)}catch(e){}
     chatInput.value="";
-  }catch(error){
-    console.error(error);
-    alert("Message send nahi hua. Firebase Firestore check karein.");
+  }catch(err){
+    console.error(err);
+    alert("Message send nahi hua. Firestore rules check karein.");
   }
   chatSend.disabled=false;
-  chatSend.textContent="Send";
 });
 
 /* ========== START ========== */
-if(movies.length===0){
-  list.innerHTML='<div class="no-chat">Movies files nahi mili. GitHub mein movies1.js, movies2.js, movies3.js upload karein.</div>';
-}else{
-  render();
-  buildFilters();
-  applyFilters();
-}
+render();
+applyFilters();
 loadChat();
 </script>
 </body>
