@@ -3662,6 +3662,7 @@ chatForm.addEventListener("submit",async(e)=>{
 });
 
 /* ========== START ========== */
+movies.forEach(m=>{ if(m.trailerId && m.trailerId.length!==11) m.trailerId=""; });
 render();
 applyFilters();
 loadChat();
