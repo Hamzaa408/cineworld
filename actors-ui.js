@@ -67,6 +67,7 @@
 
   function choose(name){
     cur=name;
+    var allBtn=document.querySelector('#menu button[data-ind="all"]'); if(allBtn) allBtn.click();
     btn.textContent=cur==="all"?"🎭 Actors":"🎭 "+cur;
     btn.classList.toggle("active",cur!=="all");
     modal.style.display="none";
