@@ -28,7 +28,7 @@ var DATA={
 "Timothy Dalton":"the-living-daylights-1987,licence-to-kill-1989",
 "Pierce Brosnan":"goldeneye-1995,tomorrow-never-dies-1997,the-world-is-not-enough-1999,die-another-day-2002",
 "Daniel Craig":"casino-royale-2006,quantum-of-solace-2008,skyfall-2012,spectre-2015,no-time-to-die-2021",
-"Shah Rukh Khan":"king-2026",
+"Shah Rukh Khan":"king-2026,deewana-1992,chamatkar-1992,baazigar-1993,darr-1993,maya-memsaab-1993,kabhi-haan-kabhi-naa-1994,anjaam-1994,karan-arjun-1995,ddlj-1995,english-babu-desi-mem-1996,chaahat-1996,koyla-1997,yes-boss-1997,pardes-1997,dil-to-pagal-hai-1997,duplicate-1998,dil-se-1998,kuch-kuch-hota-hai-1998,baadshah-1999,josh-2000,mohabbatein-2000,phir-bhi-dil-hai-hindustani-2000,asoka-2001,one-2-ka-4-2001,k3g-2001,devdas-2002,hum-tumhare-hain-sanam-2002,chalte-chalte-2003,kal-ho-naa-ho-2003,main-hoon-na-2004,veer-zaara-2004,swades-2004,paheli-2005,kabhi-alvida-naa-kehna-2006,don-2006,chak-de-india-2007,om-shanti-om-2007,rab-ne-bana-di-jodi-2008,my-name-is-khan-2010,ra-one-2011,don-2-2011,jab-tak-hai-jaan-2012,chennai-express-2013,happy-new-year-2014,dilwale-2015,fan-2016,dear-zindagi-2016,raees-2017,jab-harry-met-sejal-2017,zero-2018,pathaan-2023,jawan-2023,dunki-2023",
 "Deepika Padukone":"chhapaak-2020,king-2026",
 "Ayushmann Khurrana":"shubh-mangal-zyada-saavdhan-2020,udta-teer-2026",
 "Sara Ali Khan":"love-aaj-kal-2020,udta-teer-2026",
