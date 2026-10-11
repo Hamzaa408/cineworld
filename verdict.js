@@ -1,8 +1,8 @@
 (function () {
   var css = document.createElement("style");
   css.textContent =
-    ".verdict{margin:6px 0 10px;padding:9px 10px;border-radius:9px;background:#1f1f1f;font-size:13px;font-weight:bold}" +
-    ".verdict small{display:block;color:#aaa;font-weight:normal;margin-top:3px}" +
+    ".verdict{margin:6px 0 10px;padding:9px 10px;border-radius:9px;background:#1f1f1f;font-size:14px;font-weight:bold}" +
+    ".verdict small{display:block;color:#aaa;font-weight:normal;font-size:12px;margin-top:3px}" +
     ".verdict .bar{height:6px;border-radius:4px;background:#333;margin-top:7px;overflow:hidden}" +
     ".verdict .bar i{display:block;height:100%}";
   document.head.appendChild(css);
@@ -20,10 +20,10 @@
   }
 
   function verdictOf(s) {
-    if (s >= 80) return { t: "🔥 Zaroor dekho", c: "#22c55e" };
-    if (s >= 65) return { t: "👍 Dekhne layak", c: "#84cc16" };
-    if (s >= 50) return { t: "😐 Time ho to dekho", c: "#eab308" };
-    return { t: "👎 Skip kar sakte ho", c: "#ef4444" };
+    if (s >= 80) return { t: "All Time Watch", c: "#22c55e" };
+    if (s >= 65) return { t: "One Time Watch", c: "#84cc16" };
+    if (s >= 50) return { t: "Average Watch", c: "#eab308" };
+    return { t: "Skip It", c: "#ef4444" };
   }
 
   document.querySelectorAll(".card").forEach(function (card) {
@@ -38,12 +38,12 @@
     if (m.verdict) {
       box.innerHTML = '<span style="color:#ffd700">' + m.verdict + "</span>";
     } else if (s === null) {
-      box.innerHTML = '<span style="color:#aaa">Verdict: abhi rating nahi</span>';
+      box.innerHTML = '<span style="color:#aaa">Verdict: Rating not available</span>';
     } else {
       var v = verdictOf(s);
       box.innerHTML =
         '<span style="color:' + v.c + '">' + v.t + "</span>" +
-        "<small>Score: " + s + "/100</small>" +
+        "<small>Score: " + s + "/100 (IMDb + RT)</small>" +
         '<div class="bar"><i style="width:' + s + "%;background:" + v.c + '"></i></div>';
     }
     anchor.parentNode.insertBefore(box, anchor);
