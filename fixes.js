@@ -1,4 +1,14 @@
 (function () {
+  /* 1. Duplicate movies hatao (sabse neeche wali copy rakhta hai) */
+  var seen = {};
+  var all = [].slice.call(document.querySelectorAll(".card"));
+  for (var i = all.length - 1; i >= 0; i--) {
+    var mm = all[i]._m;
+    if (!mm) continue;
+    if (seen[mm.id]) all[i].remove(); else seen[mm.id] = 1;
+  }
+
+  /* 2. Poster nahi aaya to Wikipedia search se dhoondo */
   function fixPosters() {
     document.querySelectorAll(".card").forEach(function (card) {
       var m = card._m;
@@ -23,6 +33,7 @@
   setTimeout(fixPosters, 5000);
   setTimeout(fixPosters, 12000);
 
+  /* 3. Trailer: error aaye to saaf message dikhao */
   var tf = document.getElementById("tf");
   var tl = document.getElementById("tl");
   var tm = document.getElementById("tm");
