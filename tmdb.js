@@ -1,5 +1,5 @@
 (function () {
-  var KEY = 96c02451e55812e5a5685360a9b42b23
+  var KEY = "96c02451e55812e5a5685360a9b42b23";
   if (KEY.indexOf("PASTE") === 0) return;
   var IMG = "https://image.tmdb.org/t/p/w500";
   var API = "https://api.themoviedb.org/3";
@@ -27,7 +27,7 @@
     if (cache[m.id]) return Promise.resolve(cache[m.id]);
     var title = encodeURIComponent(clean(m.title));
     var y = m.year ? "&year=" + m.year : "";
-    var hindi = m.industry === "bollywood" || (m.budget || "").indexOf("₹") !== -1;
+    var hindi = (m.industry || "").toLowerCase() === "bollywood" || (m.budget || "").indexOf("₹") !== -1;
     return getJSON(API + "/search/movie?api_key=" + KEY + "&query=" + title + y)
       .then(function (s) {
         if (s.results && s.results.length) return s;
