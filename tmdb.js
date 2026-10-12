@@ -1,14 +1,40 @@
 (function () {
   var KEY = "96c02451e55812e5a5685360a9b42b23";
-  if (KEY.indexOf("PASTE") === 0) return;
   var IMG = "https://image.tmdb.org/t/p/w500";
   var API = "https://api.themoviedb.org/3";
   var cache = {};
   try { cache = JSON.parse(localStorage.getItem("tmdb_cache_v1") || "{}"); } catch (e) {}
   function save() { try { localStorage.setItem("tmdb_cache_v1", JSON.stringify(cache)); } catch (e) {} }
-  function clean(t) { return t.replace(/\s*\(\d{4}\)\s*$/, "").replace(/\s*-\s*Live Action$/i, ""); }
+  function clean(t) { return t.replace(/\s*\(\d{4}\)\s*$/, "").replace(/\s*-\s*Live Action$/i, "").replace(/\s*Live Action$/i, ""); }
   function getJSON(u) { return fetch(u).then(function (r) { return r.json(); }); }
 
+  /* ---- neeche status line ---- */
+  var st = document.createElement("p");
+  st.style.cssText = "text-align:center;color:#888;font-size:12px;padding:14px 10px 4px";
+  st.textContent = "TMDB: check ho raha hai...";
+  document.body.appendChild(st);
+
+  getJSON(API + "/configuration?api_key=" + KEY)
+    .then(function (j) {
+      if (j && j.images) {
+        st.textContent = "TMDB: chal raha hai (key theek hai)";
+        st.style.color = "#4caf50";
+      } else {
+        st.textContent = "TMDB: key galat hai - " + ((j && j.status_message) || "pata nahi");
+        st.style.color = "#e50914";
+      }
+    })
+    .catch(function () {
+      st.textContent = "TMDB: connect nahi ho raha (internet ya network block)";
+      st.style.color = "#e50914";
+    });
+
+  var f = document.createElement("p");
+  f.style.cssText = "text-align:center;color:#666;font-size:11px;padding:4px 10px 16px";
+  f.textContent = "This product uses the TMDB API but is not endorsed or certified by TMDB.";
+  document.body.appendChild(f);
+
+  /* ---- trailer pasand karna ---- */
   function pick(list, hindi) {
     var yt = (list || []).filter(function (v) { return v.site === "YouTube"; });
     var types = ["Trailer", "Teaser"];
@@ -58,47 +84,49 @@
     }
   }
 
-  var cards = [].slice.call(document.querySelectorAll(".card"));
+  var io = null;
+  if ("IntersectionObserver" in window) {
+    io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) {
+          io.unobserve(e.target);
+          var card = e.target, m = card._m;
+          if (m) lookup(m).then(function (d) { if (d) show(card, m, d); });
+        }
+      });
+    }, { rootMargin: "400px" });
+  }
 
-  function handle(card) {
+  function watch(card) {
     var m = card._m;
     if (!m || card._tm) return;
     card._tm = true;
-    lookup(m).then(function (d) { if (d) show(card, m, d); });
-  }
 
-  if ("IntersectionObserver" in window) {
-    var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (e.isIntersecting) { io.unobserve(e.target); handle(e.target); }
-      });
-    }, { rootMargin: "400px" });
-    cards.forEach(function (c) { io.observe(c); });
-  } else {
-    cards.slice(0, 40).forEach(handle);
-  }
+    if (io) io.observe(card);
+    else lookup(m).then(function (d) { if (d) show(card, m, d); });
 
-  cards.forEach(function (card) {
-    var m = card._m;
     var b = card.querySelector(".trailer");
-    if (!m || !b) return;
+    if (!b) return;
     var old = b.onclick;
     b.onclick = function (e) {
       var c = cache[m.id];
       if (c) {
         if (c.trailer) m.trailerId = c.trailer;
-        return old.call(b, e);
+        return old ? old.call(b, e) : undefined;
       }
       e.preventDefault();
       lookup(m).then(function (d) {
         if (d && d.trailer) m.trailerId = d.trailer;
-        old.call(b, e);
+        if (old) old.call(b, e);
       });
     };
-  });
+  }
 
-  var f = document.createElement("p");
-  f.style.cssText = "text-align:center;color:#666;font-size:11px;padding:16px";
-  f.textContent = "This product uses the TMDB API but is not endorsed or certified by TMDB.";
-  document.body.appendChild(f);
-})();
+  function scan() {
+    [].slice.call(document.querySelectorAll(".card")).forEach(watch);
+  }
+
+  scan();
+
+  var box = document.getElementById("movieList") || document.body;
+  new MutationObserver(scan
