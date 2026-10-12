@@ -7,6 +7,10 @@
   function save() { try { localStorage.setItem("tmdb_cache_v1", JSON.stringify(cache)); } catch (e) {} }
   function clean(t) { return t.replace(/\s*\(\d{4}\)\s*$/, "").replace(/\s*-\s*Live Action$/i, "").replace(/\s*Live Action$/i, ""); }
   function getJSON(u) { return fetch(u).then(function (r) { return r.json(); }); }
+  function isIndian(m) {
+    var ind = (m.industry || "").toLowerCase();
+    return ind === "bollywood" || ind === "tollywood" || (m.budget || "").indexOf("₹") !== -1;
+  }
 
   /* ---- neeche status line ---- */
   var st = document.createElement("p");
@@ -53,7 +57,7 @@
     if (cache[m.id]) return Promise.resolve(cache[m.id]);
     var title = encodeURIComponent(clean(m.title));
     var y = m.year ? "&year=" + m.year : "";
-    var hindi = (m.industry || "").toLowerCase() === "bollywood" || (m.budget || "").indexOf("₹") !== -1;
+    var hindi = isIndian(m);
     return getJSON(API + "/search/movie?api_key=" + KEY + "&query=" + title + y)
       .then(function (s) {
         if (s.results && s.results.length) return s;
@@ -108,13 +112,23 @@
     var b = card.querySelector(".trailer");
     if (!b) return;
     var old = b.onclick;
+
     b.onclick = function (e) {
+      e.preventDefault();
+
+      /* Bollywood / Tollywood: seedha YouTube search */
+      if (isIndian(m)) {
+        window.open("https://www.youtube.com/results?search_query=" +
+          encodeURIComponent(m.title + " official trailer"), "_blank");
+        return;
+      }
+
+      /* Hollywood: site ke andar trailer */
       var c = cache[m.id];
       if (c) {
         if (c.trailer) m.trailerId = c.trailer;
         return old ? old.call(b, e) : undefined;
       }
-      e.preventDefault();
       lookup(m).then(function (d) {
         if (d && d.trailer) m.trailerId = d.trailer;
         if (old) old.call(b, e);
@@ -129,4 +143,5 @@
   scan();
 
   var box = document.getElementById("movieList") || document.body;
-  new MutationObserver(scan
+  new MutationObserver(scan).observe(box, { childList: true, subtree: true });
+})();
