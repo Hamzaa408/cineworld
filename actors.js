@@ -90,4 +90,14 @@ Object.keys(DATA).forEach(function(n){ACTORS[n]=DATA[n].split(",");});
   });
   document.addEventListener("click",function(){if(cur!=="all")applyActor();});
   document.addEventListener("input",function(){if(cur!=="all")applyActor();});
+    document.querySelectorAll("#tabs button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (cur !== "all") {
+        cur = "all";
+        sel.value = "all";
+        sel.classList.remove("active");
+        applyFilters();
+      }
+    });
+  });
 })();
