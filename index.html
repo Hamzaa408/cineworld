@@ -81,7 +81,23 @@ h1{text-align:center;margin:30px 0 20px}
 <body>
 
 <header>
-<div class="logo" style="color:#a855f7">MoviesDream</div>
+<style>
+.logo{
+  background:linear-gradient(90deg,#a855f7,#ef4444,#22c55e,#3b82f6,#a855f7);
+  background-size:300% 100%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  color:transparent;
+  animation:logoFlow 6s ease-in-out infinite;
+}
+@keyframes logoFlow{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+</style>
+<div class="logo">MoviesDream</div>
   <p>Movies • Reviews • Trailers</p>
 </header>
 
