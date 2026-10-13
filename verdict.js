@@ -11,11 +11,14 @@
     r = String(r || "");
     var i = r.match(/IMDb\s*([\d.]+)/);
     var t = r.match(/RT\s*(\d+)\s*%/);
+    var d = r.match(/TMDB\s*([\d.]+)/);
     var a = i ? parseFloat(i[1]) * 10 : null;
     var b = t ? parseFloat(t[1]) : null;
-    if (a !== null && b !== null) return Math.round((a + b) / 2);
-    if (a !== null) return Math.round(a);
-    if (b !== null) return Math.round(b);
+    var c = d ? parseFloat(d[1]) * 10 : null;
+    if (a !== null && b !== null) return { s: Math.round((a + b) / 2), l: "IMDb + RT" };
+    if (a !== null) return { s: Math.round(a), l: "IMDb" };
+    if (b !== null) return { s: Math.round(b), l: "RT" };
+    if (c !== null) return { s: Math.round(c), l: "TMDB" };
     return null;
   }
 
@@ -26,26 +29,54 @@
     return { t: "Skip It", c: "#ef4444" };
   }
 
-  document.querySelectorAll(".card").forEach(function (card) {
+  function paint(card) {
     var m = card._m;
     if (!m) return;
     if (typeof isUpcoming === "function" && isUpcoming(m)) return;
     var anchor = card.querySelector(".stars");
     if (!anchor) return;
-    var box = document.createElement("div");
-    box.className = "verdict";
-    var s = score(m.rating);
+
+    var key = String(m.rating || "") + "|" + String(m.verdict || "");
+    if (card._vr === key && card._vbox) return;
+    card._vr = key;
+
+    var box = card._vbox;
+    if (!box) {
+      box = document.createElement("div");
+      box.className = "verdict";
+      card._vbox = box;
+      anchor.parentNode.insertBefore(box, anchor);
+    }
+
+    var sc = score(m.rating);
     if (m.verdict) {
       box.innerHTML = '<span style="color:#ffd700">' + m.verdict + "</span>";
-    } else if (s === null) {
+    } else if (!sc) {
       box.innerHTML = '<span style="color:#aaa">Verdict: Rating not available</span>';
     } else {
-      var v = verdictOf(s);
+      var v = verdictOf(sc.s);
       box.innerHTML =
         '<span style="color:' + v.c + '">' + v.t + "</span>" +
-        "<small>Score: " + s + "/100 (IMDb + RT)</small>" +
-        '<div class="bar"><i style="width:' + s + "%;background:" + v.c + '"></i></div>';
+        "<small>Score: " + sc.s + "/100 (" + sc.l + ")</small>" +
+        '<div class="bar"><i style="width:' + sc.s + "%;background:" + v.c + '"></i></div>';
     }
-    anchor.parentNode.insertBefore(box, anchor);
+  }
+
+  document.querySelectorAll(".card").forEach(paint);
+
+  /* tmdb.js baad mein rating bharti hai, tab bar dobara bana do */
+  new MutationObserver(function (muts) {
+    var seen = [];
+    muts.forEach(function (mu) {
+      var el = mu.target.nodeType === 1 ? mu.target : mu.target.parentNode;
+      if (!el || !el.closest || el.closest(".verdict")) return;
+      var card = el.closest(".card");
+      if (card && seen.indexOf(card) === -1) seen.push(card);
+    });
+    seen.forEach(paint);
+  }).observe(document.getElementById("movieList") || document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
   });
 })();
