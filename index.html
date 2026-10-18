@@ -5119,6 +5119,43 @@ const movies = [
     }
   }
 })();
+  /* ===== AUTO RATING: IMDb + RT (OMDb se) ===== */
+(function(){
+  const KEY = "c51de151";
+  const CACHE = "ratingCache_v1";
+  let cache = {};
+  try { cache = JSON.parse(localStorage.getItem(CACHE) || "{}"); } catch(e) {}
+
+  function clean(t){ return String(t).replace(/\s*\(\d{4}\)\s*$/, "").trim(); }
+
+  // Cache ki ratings pehle laga do
+  movies.forEach(function(m){
+    if (m.status === "Coming Soon" || m.status === "Most Awaited") return;
+    if (String(m.rating || "").indexOf("IMDb") !== -1) return;
+    if (cache[m.id] && cache[m.id] !== "none") m.rating = cache[m.id];
+  });
+
+  // Jinki rating nahi mili, un ko OMDb se lao
+  movies.forEach(function(m){
+    if (m.status === "Coming Soon" || m.status === "Most Awaited") return;
+    if (String(m.rating || "").indexOf("IMDb") !== -1) return;
+    if (cache[m.id]) return;
+    const url = "https://www.omdbapi.com/?apikey=" + KEY +
+      "&t=" + encodeURIComponent(clean(m.title)) +
+      "&y=" + encodeURIComponent(m.year);
+    fetch(url).then(function(r){ return r.json(); }).then(function(d){
+      if (!d || d.Response === "False" || !d.imdbRating || d.imdbRating === "N/A") {
+        cache[m.id] = "none";
+      } else {
+        let txt = "IMDb " + d.imdbRating;
+        const rt = (d.Ratings || []).find(function(x){ return x.Source === "Rotten Tomatoes"; });
+        if (rt) txt += " • RT " + rt.Value;
+        cache[m.id] = txt;
+      }
+      try { localStorage.setItem(CACHE, JSON.stringify(cache)); } catch(e) {}
+    }).catch(function(){});
+  });
+})();
 /* ========== HELPERS ========== */
 const list=document.getElementById("movieList");
 
