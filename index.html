@@ -5592,5 +5592,38 @@ loadChat();
   <script src="tmdb.js"></script>
     <script src="actors-ui.js"></script>
     <script src="extras.js"></script>
+  <script>
+/* ===== RATING STYLE: RAINBOW ===== */
+(function(){
+  var st = document.createElement("style");
+  st.textContent =
+    "@keyframes ratingFlow{0%{background-position:0% 50%}100%{background-position:300% 50%}}" +
+    ".rating-rainbow{" +
+      "display:inline-block;" +
+      "font-weight:800;" +
+      "letter-spacing:.6px;" +
+      "background:linear-gradient(90deg,#ff0080,#ff8c00,#ffe600,#00e676,#00b0ff,#d500f9,#ff0080);" +
+      "background-size:300% 100%;" +
+      "-webkit-background-clip:text;background-clip:text;" +
+      "-webkit-text-fill-color:transparent;color:transparent;" +
+      "animation:ratingFlow 4s linear infinite;" +
+      "filter:drop-shadow(0 0 6px rgba(255,255,255,.25));" +
+    "}";
+  document.head.appendChild(st);
+
+  function paint(){
+    var all = document.querySelectorAll("div,span,p,small,b");
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i];
+      if (el.children.length) continue;
+      if (el.classList.contains("rating-rainbow")) continue;
+      var t = (el.textContent || "").trim();
+      if (/^(IMDb|TMDB)\s*\d/.test(t)) el.classList.add("rating-rainbow");
+    }
+  }
+  paint();
+  new MutationObserver(paint).observe(document.documentElement, {childList:true, subtree:true});
+})();
+</script>
 </body>
 </html>
