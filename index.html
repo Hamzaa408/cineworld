@@ -5625,5 +5625,54 @@ loadChat();
   new MutationObserver(paint).observe(document.documentElement, {childList:true, subtree:true});
 })();
 </script>
+  <script>
+/* ===== AUTO TRAILER ID (TMDB se) ===== */
+(function(){
+  var TKEY =  "96c02451e55812e5a5685360a9b42b23";
+  var CK = "trailerCache_v1";
+  var cache = {};
+  try { cache = JSON.parse(localStorage.getItem(CK) || "{}"); } catch(e) {}
+
+  function clean(t){ return String(t).replace(/\s*\(\d{4}\)\s*$/, "").trim(); }
+  function save(){ try { localStorage.setItem(CK, JSON.stringify(cache)); } catch(e) {} }
+  function j(u){ return fetch(u).then(function(r){ return r.json(); }); }
+
+  var changed = false;
+  var jobs = [];
+
+  movies.forEach(function(m){
+    if (m.trailerId) return;
+    if (cache[m.id] && cache[m.id] !== "none") { m.trailerId = cache[m.id]; changed = true; return; }
+    if (cache[m.id] === "none") return;
+
+    var q = "https://api.themoviedb.org/3/search/movie?api_key=" + TKEY +
+            "&query=" + encodeURIComponent(clean(m.title)) +
+            "&year=" + encodeURIComponent(m.year);
+    var p = j(q).then(function(d){
+      if (!d.results || !d.results.length) { cache[m.id] = "none"; return; }
+      var id = d.results[0].id;
+      var v = "https://api.themoviedb.org/3/movie/" + id + "/videos?api_key=" + TKEY +
+              "&language=en-US&include_video_language=en,hi,te,ta,kn,ml,null";
+      return j(v).then(function(x){
+        var list = (x.results || []).filter(function(a){ return a.site === "YouTube"; });
+        var pick = list.find(function(a){ return a.type === "Trailer" && a.official; }) ||
+                   list.find(function(a){ return a.type === "Trailer"; }) ||
+                   list.find(function(a){ return a.type === "Teaser"; });
+        if (pick) { m.trailerId = pick.key; cache[m.id] = pick.key; changed = true; }
+        else { cache[m.id] = "none"; }
+      });
+    }).catch(function(){});
+    jobs.push(p);
+  });
+
+  Promise.all(jobs).then(function(){
+    save();
+    if (changed) {
+      try { render(); } catch(e) {}
+      try { applyFilters(); } catch(e) {}
+    }
+  });
+})();
+</script>
 </body>
 </html>
