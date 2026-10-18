@@ -5626,10 +5626,10 @@ loadChat();
 })();
 </script>
 <script>
-/* ===== AUTO TRAILER ID v2 ===== */
+/* ===== AUTO TRAILER ID v3 (sirf chalne wala trailer) ===== */
 (function(){
   var TKEY = "96c02451e55812e5a5685360a9b42b23";
-  var CK = "trailerCache_v2";
+  var CK = "trailerCache_v3";
   var cache = {};
   try { cache = JSON.parse(localStorage.getItem(CK) || "{}"); } catch(e) {}
 
@@ -5639,6 +5639,20 @@ loadChat();
     return fetch(u).then(function(r){
       if (!r.ok) throw new Error("bad");
       return r.json();
+    });
+  }
+
+  // Check: video site mein chal sakti hai ya nahi
+  function canEmbed(key){
+    var u = "https://www.youtube.com/oembed?format=json&url=" +
+            encodeURIComponent("https://www.youtube.com/watch?v=" + key);
+    return fetch(u).then(function(r){ return r.ok; }).catch(function(){ return true; });
+  }
+
+  function firstEmbeddable(keys, i){
+    if (i >= keys.length) return Promise.resolve("");
+    return canEmbed(keys[i]).then(function(ok){
+      return ok ? keys[i] : firstEmbeddable(keys, i + 1);
     });
   }
 
@@ -5660,11 +5674,17 @@ loadChat();
               "&language=en-US&include_video_language=en,hi,te,ta,kn,ml,null";
       return j(v).then(function(x){
         var list = (x.results || []).filter(function(a){ return a.site === "YouTube"; });
-        var pick = list.find(function(a){ return a.type === "Trailer" && a.official; }) ||
-                   list.find(function(a){ return a.type === "Trailer"; }) ||
-                   list.find(function(a){ return a.type === "Teaser"; });
-        if (pick) { m.trailerId = pick.key; cache[m.id] = pick.key; changed = true; }
-        else { cache[m.id] = "none"; }
+        var order = [
+          list.filter(function(a){ return a.type === "Trailer" && a.official; }),
+          list.filter(function(a){ return a.type === "Trailer" && !a.official; }),
+          list.filter(function(a){ return a.type === "Teaser"; })
+        ];
+        var keys = [];
+        order.forEach(function(g){ g.forEach(function(a){ keys.push(a.key); }); });
+        return firstEmbeddable(keys, 0).then(function(key){
+          if (key) { m.trailerId = key; cache[m.id] = key; changed = true; }
+          else { cache[m.id] = "none"; }
+        });
       });
     }).catch(function(){});
     jobs.push(p);
