@@ -5103,6 +5103,22 @@ const movies = [
       review: "Akshay Kumar aur Saif Ali Khan ki film, opening ke baad hi gir gayi."
     },
     ];
+  /* ===== DUPLICATE MOVIES HATAO ===== */
+(function(){
+  const seenId = new Set();
+  const seenTitle = new Set();
+  for (let i = 0; i < movies.length; i++) {
+    const id = String(movies[i].id || "").trim().toLowerCase();
+    const title = String(movies[i].title || "").trim().toLowerCase();
+    if ((id && seenId.has(id)) || (title && seenTitle.has(title))) {
+      movies.splice(i, 1);
+      i--;
+    } else {
+      if (id) seenId.add(id);
+      if (title) seenTitle.add(title);
+    }
+  }
+})();
 /* ========== HELPERS ========== */
 const list=document.getElementById("movieList");
 
