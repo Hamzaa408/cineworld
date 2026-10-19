@@ -97,6 +97,49 @@ h1{text-align:center;margin:30px 0 20px}
   100%{background-position:0% 50%}
 }
 </style>
+  <style>
+:root{--bg:#0b0a14;--panel:#15131f;--panel2:#1b1829;--line:#2b2540;--green:#34e0a1;--purple:#a855f7;--text:#fff;--muted:#a9a6bd}
+body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif}
+body{display:grid;grid-template-columns:104px minmax(0,1fr);column-gap:10px;align-items:start;padding:0 8px 20px}
+body header{grid-column:1/-1;grid-row:1;margin:0 -8px;background:#0f0d1a;padding:22px 12px 18px;border-bottom:3px solid var(--green)}
+body header p{color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-size:12px}
+body .topbar{grid-column:1;grid-row:2/5;position:sticky;top:10px;z-index:50;margin-top:14px;padding:10px 8px;background:transparent;border:2px solid var(--green);border-radius:20px}
+body .search{grid-column:2;grid-row:2;width:100%;max-width:none;margin:14px 0 0;padding:14px 16px;background:var(--panel);border:2px solid var(--line);border-radius:16px;color:var(--text);font-size:15px}
+body .search:focus{border-color:var(--green)}
+body h1{grid-column:2;grid-row:3;margin:14px 0 10px;padding:16px 14px;text-align:left;font-size:19px;font-weight:900;text-transform:uppercase;border-radius:20px;background:linear-gradient(90deg,#10151c 0%,var(--green) 50%,#10151c 100%);color:#fff}
+body .movies{grid-column:2;grid-row:4;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:0;max-width:none;margin:0}
+body .chat-section{grid-column:1/-1;grid-row:5;width:100%}
+body .tabs{display:flex;flex-direction:column;gap:8px;padding:0 0 10px}
+body .menu{display:flex;flex-direction:column;gap:8px;padding:0;overflow:visible}
+body .tabs button,body .menu button,body .menu select{width:100%;background:var(--panel);color:var(--text);border:2px solid var(--green);border-radius:14px;padding:11px 4px;font-size:12px;font-weight:800;text-align:center;white-space:normal;line-height:1.25}
+body .tabs button.active,body .menu button.active,body .menu select.active{background:var(--green);color:#06140e}
+body .menu select{appearance:none;-webkit-appearance:none}
+body .card{background:linear-gradient(180deg,#1a1626 0%,var(--panel) 100%);border:2px solid rgba(168,85,247,.45);border-radius:18px;box-shadow:none}
+body .poster{height:190px;background:#12101c}
+body .info{padding:10px}
+body .info h2{font-size:14px;line-height:1.25;margin:0 0 6px}
+body .info p{color:var(--muted);font-size:12px;margin:4px 0 8px}
+body .status{font-size:11px;padding:4px 8px;border-radius:8px}
+body .stars{font-size:18px;letter-spacing:1px}
+body .buttons{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:auto}
+body .btn{min-width:0;padding:9px 4px;font-size:12px;border-radius:10px}
+body .btn.watch{background:var(--green);color:#06140e}
+body .btn.trailer{background:transparent;border:2px solid var(--purple);color:#fff;padding:7px 4px}
+body .btn.review{background:#2563eb}
+body .btn.comments{background:#7c3aed}
+body #tm button,body #rm button,body #cm .send,body .chat-send{background:var(--green);color:#06140e;font-weight:800}
+body #rm .box,body #cm .box,body .chat-box{background:var(--panel);border:2px solid var(--line);border-radius:18px}
+body #rm h3,body #cmTitle,body .chat-title h2,body .chat-name{color:var(--green)}
+body .chat-message,body #cm input,body .chat-name-input,body .chat-input{background:var(--panel2);border-color:var(--line);color:var(--text)}
+body #cmMessages,body .chat-messages{background:#0e0c18}
+@media(min-width:700px){
+body{grid-template-columns:170px minmax(0,1fr);column-gap:18px;padding:0 18px 30px}
+body header{margin:0 -18px}
+body .tabs button,body .menu button,body .menu select{font-size:14px;padding:12px 8px}
+body .movies{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+body .poster{height:270px}
+}
+</style>
 <div class="logo">MoviesDream</div>
   <p>Movies • Reviews • Trailers</p>
 </header>
