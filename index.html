@@ -140,6 +140,37 @@ body .movies{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
 body .poster{height:270px}
 }
 </style>
+  <style>
+body .tabs button.active,body .menu button.active,body .menu select.active{background:#34e0a1!important;border-color:#34e0a1!important;color:#06140e!important}
+body .rating-rainbow{background:none!important;-webkit-text-fill-color:#34e0a1!important;color:#34e0a1!important;animation:none!important}
+@media(max-width:699px){
+body{grid-template-columns:78px minmax(0,1fr)!important;column-gap:8px!important;padding:0 6px 20px!important}
+body header{margin:0 -6px!important}
+body .topbar{padding:8px 6px!important;border-radius:16px!important}
+body .tabs button,body .menu button,body .menu select{font-size:11px!important;padding:10px 2px!important;border-radius:12px!important}
+body .movies{gap:8px!important}
+body .card{overflow:hidden!important}
+body .info{padding:8px!important}
+body .info h2{font-size:13px!important}
+body .info p{font-size:11px!important}
+body .stars{font-size:15px!important;letter-spacing:0!important}
+body .buttons{grid-template-columns:1fr!important}
+body .btn{font-size:12px!important;padding:9px 4px!important}
+}
+</style>
+<style>
+@property --green{syntax:'<color>';inherits:true;initial-value:#e8e83a}
+:root{animation:colorCycle 12s linear infinite}
+@keyframes colorCycle{
+0%,10%{--green:#e8e83a}
+33%,43%{--green:#34e0a1}
+66%,76%{--green:#ff4081}
+100%{--green:#e8e83a}
+}
+body .tabs button.active,body .menu button.active,body .menu select.active{background:var(--green)!important;border-color:var(--green)!important;color:#0b0a14!important}
+body .rating-rainbow{background:none!important;-webkit-text-fill-color:var(--green)!important;color:var(--green)!important;animation:none!important}
+body h1{color:#fff!important}
+</style>
 <div class="logo">MoviesDream</div>
   <p>Movies • Reviews • Trailers</p>
 </header>
