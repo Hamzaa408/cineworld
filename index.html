@@ -5593,6 +5593,7 @@ loadChat();
     <script src="actors-ui.js"></script>
     <script src="extras.js"></script>
   <script>
+<script>
 /* ===== RATING STYLE: RAINBOW ===== */
 (function(){
   var st = document.createElement("style");
@@ -5625,30 +5626,32 @@ loadChat();
   new MutationObserver(paint).observe(document.documentElement, {childList:true, subtree:true});
 })();
 </script>
+
 <script>
-/* ===== AUTO TRAILER ID v3 (sirf chalne wala trailer) ===== */
+/* ===== AUTO TRAILER ID v4 ===== */
 (function(){
   var TKEY = "96c02451e55812e5a5685360a9b42b23";
-  var CK = "trailerCache_v3";
+  var CK = "trailerCache_v4";
   var cache = {};
   try { cache = JSON.parse(localStorage.getItem(CK) || "{}"); } catch(e) {}
+  var st = { ok: 0, none: 0, err: 0, last: "-" };
 
   function clean(t){ return String(t).replace(/\s*\(\d{4}\)\s*$/, "").trim(); }
   function save(){ try { localStorage.setItem(CK, JSON.stringify(cache)); } catch(e) {} }
+  function wait(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
   function j(u){
     return fetch(u).then(function(r){
-      if (!r.ok) throw new Error("bad");
+      if (!r.ok) { st.last = "TMDB " + r.status; throw new Error("tmdb"); }
       return r.json();
     });
   }
-
-  // Check: video site mein chal sakti hai ya nahi
   function canEmbed(key){
     var u = "https://www.youtube.com/oembed?format=json&url=" +
             encodeURIComponent("https://www.youtube.com/watch?v=" + key);
-    return fetch(u).then(function(r){ return r.ok; }).catch(function(){ return true; });
+    return fetch(u).then(function(r){
+      return !(r.status === 401 || r.status === 403 || r.status === 404);
+    }).catch(function(){ return true; });
   }
-
   function firstEmbeddable(keys, i){
     if (i >= keys.length) return Promise.resolve("");
     return canEmbed(keys[i]).then(function(ok){
@@ -5656,61 +5659,60 @@ loadChat();
     });
   }
 
-  var changed = false;
-  var jobs = [];
-
+  var queue = [];
   movies.forEach(function(m){
     if (m.trailerId && m.trailerId.length === 11) return;
-    if (cache[m.id] && cache[m.id] !== "none") { m.trailerId = cache[m.id]; changed = true; return; }
-    if (cache[m.id] === "none") return;
+    var c = cache[m.id];
+    if (c && c !== "none") { m.trailerId = c; return; }
+    if (c === "none") return;
+    queue.push(m);
+  });
+  queue.sort(function(a, b){ return String(b.year).localeCompare(String(a.year)); });
 
+  function work(m){
     var q = "https://api.themoviedb.org/3/search/movie?api_key=" + TKEY +
             "&query=" + encodeURIComponent(clean(m.title)) +
             "&year=" + encodeURIComponent(m.year);
-    var p = j(q).then(function(d){
-      if (!d.results || !d.results.length) { cache[m.id] = "none"; return; }
-      var id = d.results[0].id;
-      var v = "https://api.themoviedb.org/3/movie/" + id + "/videos?api_key=" + TKEY +
+    return j(q).then(function(d){
+      if (!d.results || !d.results.length) { cache[m.id] = "none"; st.none++; save(); return; }
+      var v = "https://api.themoviedb.org/3/movie/" + d.results[0].id + "/videos?api_key=" + TKEY +
               "&language=en-US&include_video_language=en,hi,te,ta,kn,ml,null";
       return j(v).then(function(x){
         var list = (x.results || []).filter(function(a){ return a.site === "YouTube"; });
-        var order = [
+        var keys = [];
+        [
           list.filter(function(a){ return a.type === "Trailer" && a.official; }),
           list.filter(function(a){ return a.type === "Trailer" && !a.official; }),
           list.filter(function(a){ return a.type === "Teaser"; })
-        ];
-        var keys = [];
-        order.forEach(function(g){ g.forEach(function(a){ keys.push(a.key); }); });
+        ].forEach(function(g){ g.forEach(function(a){ keys.push(a.key); }); });
         return firstEmbeddable(keys, 0).then(function(key){
-          if (key) { m.trailerId = key; cache[m.id] = key; changed = true; }
-          else { cache[m.id] = "none"; }
+          if (key) { m.trailerId = key; cache[m.id] = key; st.ok++; }
+          else { cache[m.id] = "none"; st.none++; }
+          save();
         });
       });
-    }).catch(function(){});
-    jobs.push(p);
-  });
+    }).catch(function(){ st.err++; });
+  }
 
-  Promise.all(jobs).then(function(){
-    save();
-    if (changed) {
-      try { render(); } catch(e) {}
-      try { applyFilters(); } catch(e) {}
-    }
-  });
-})();
-</script>
-  <script>
-/* ===== CHECK (baad mein delete kar dena) ===== */
-setTimeout(function(){
-  var ok = movies.filter(function(m){ return m.trailerId && m.trailerId.length === 11; }).length;
-  var s = movies.filter(function(m){ return String(m.year) === "2026" && m.status !== "Coming Soon"; })[0] || {};
+  function runner(){
+    if (!queue.length) return Promise.resolve();
+    return work(queue.shift()).then(function(){ return wait(120); }).then(runner);
+  }
+  runner(); runner(); runner();
+
+  /* Hara dabba: 90 second baad khud hat jayega */
   var b = document.createElement("div");
   b.style.cssText = "position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#000;color:#0f0;padding:10px;font-size:13px;border-top:2px solid #0f0";
-  b.textContent = "Trailer ID bhari: " + ok + " / " + movies.length +
-                  " | " + (s.title || "?") + " = [" + (s.trailerId || "khali") + "]";
-  b.onclick = function(){ b.remove(); };
+  var n = 0;
+  var iv = setInterval(function(){
+    n++;
+    b.textContent = "Trailer: mili " + st.ok + " | nahi " + st.none + " | error " + st.err +
+                    " | baqi " + queue.length + " | " + st.last;
+    if (n > 90) { clearInterval(iv); b.remove(); }
+  }, 1000);
+  b.onclick = function(){ b.remove(); clearInterval(iv); };
   document.body.appendChild(b);
-}, 20000);
+})();
 </script>
 </body>
 </html>
