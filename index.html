@@ -5699,5 +5699,18 @@ loadChat();
   });
 })();
 </script>
+  <script>
+/* ===== CHECK (baad mein delete kar dena) ===== */
+setTimeout(function(){
+  var ok = movies.filter(function(m){ return m.trailerId && m.trailerId.length === 11; }).length;
+  var s = movies.filter(function(m){ return String(m.year) === "2026" && m.status !== "Coming Soon"; })[0] || {};
+  var b = document.createElement("div");
+  b.style.cssText = "position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#000;color:#0f0;padding:10px;font-size:13px;border-top:2px solid #0f0";
+  b.textContent = "Trailer ID bhari: " + ok + " / " + movies.length +
+                  " | " + (s.title || "?") + " = [" + (s.trailerId || "khali") + "]";
+  b.onclick = function(){ b.remove(); };
+  document.body.appendChild(b);
+}, 20000);
+</script>
 </body>
 </html>
